@@ -49,6 +49,12 @@ MODULE_SUPPORTED_DEVICE(DRIVER_NAME);
 static const struct pci_device_id mqnic_pci_id_table[] = {
     { PCI_DEVICE(0x1234, 0x1001) },
     { PCI_DEVICE(0x5543, 0x1001) },
+    { PCI_DEVICE(0x1234, 0x3000) },
+    { PCI_DEVICE(0x1234, 0x3001) },
+    { PCI_DEVICE(0x1234, 0x3002) },
+    { PCI_DEVICE(0x1234, 0x3010) },
+    { PCI_DEVICE(0x1234, 0x3011) },
+    { PCI_DEVICE(0x1234, 0x3012) },
     { 0 /* end */ }
 };
 

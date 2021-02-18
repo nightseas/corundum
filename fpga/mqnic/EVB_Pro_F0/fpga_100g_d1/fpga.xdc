@@ -56,7 +56,7 @@ set_property -dict {LOC AJ11  } [get_ports qsfp1_mgt_refclk_0_p] ;# MGTREFCLK0P_
 #set_property -dict {LOC W8  } [get_ports qsfp1_mgt_refclk_0_n] ;# MGTREFCLK0N_226 
 
 # 161.1328125 MHz MGT reference clock
-create_clock -period 6.206 -name qsfp1_mgt_refclk_0 [get_ports qsfp1_mgt_refclk_0_p]
+# create_clock -period 6.206 -name qsfp1_mgt_refclk_0 [get_ports qsfp1_mgt_refclk_0_p]
 
 # Interconnection-E port
 #   CH      MGT_TRX
@@ -84,7 +84,7 @@ set_property -dict {LOC AE11  } [get_ports qsfp2_mgt_refclk_0_p] ;# MGTREFCLK0P_
 #set_property -dict {LOC R8  } [get_ports qsfp2_mgt_refclk_0_n] ;# MGTREFCLK0N_227
 
 # 161.1328125 MHz MGT reference clock
-create_clock -period 6.206 -name qsfp2_mgt_refclk_0 [get_ports qsfp2_mgt_refclk_0_p]
+# create_clock -period 6.206 -name qsfp2_mgt_refclk_0 [get_ports qsfp2_mgt_refclk_0_p]
 
 # I2C interface
 # set_property -dict {LOC N36 IOSTANDARD LVCMOS18 SLEW SLOW DRIVE 8} [get_ports i2c_scl]

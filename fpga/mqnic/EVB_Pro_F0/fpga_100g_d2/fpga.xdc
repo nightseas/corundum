@@ -56,7 +56,7 @@ set_property -dict {LOC U11  } [get_ports qsfp1_mgt_refclk_0_p] ;# MGTREFCLK0P_2
 #set_property -dict {LOC W8  } [get_ports qsfp1_mgt_refclk_0_n] ;# MGTREFCLK0N_230 
 
 # 161.1328125 MHz MGT reference clock
-create_clock -period 6.206 -name qsfp1_mgt_refclk_0 [get_ports qsfp1_mgt_refclk_0_p]
+# create_clock -period 6.206 -name qsfp1_mgt_refclk_0 [get_ports qsfp1_mgt_refclk_0_p]
 
 # Interconnection-F port
 # Serdes order not swapped in FPGA
@@ -86,7 +86,7 @@ set_property -dict {LOC R11  } [get_ports qsfp2_mgt_refclk_0_p] ;# MGTREFCLK0P_2
 #set_property -dict {LOC R8  } [get_ports qsfp2_mgt_refclk_0_n] ;# MGTREFCLK0N_231
 
 # 161.1328125 MHz MGT reference clock
-create_clock -period 6.206 -name qsfp2_mgt_refclk_0 [get_ports qsfp2_mgt_refclk_0_p]
+# create_clock -period 6.206 -name qsfp2_mgt_refclk_0 [get_ports qsfp2_mgt_refclk_0_p]
 
 # I2C interface
 # set_property -dict {LOC N36 IOSTANDARD LVCMOS18 SLEW SLOW DRIVE 8} [get_ports i2c_scl]

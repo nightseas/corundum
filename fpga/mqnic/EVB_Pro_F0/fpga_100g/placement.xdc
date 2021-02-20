@@ -31,7 +31,7 @@ resize_pblock [get_pblocks pblock_slr1] -add {SLR1}
 create_pblock pblock_pcie1
 add_cells_to_pblock [get_pblocks pblock_pcie1] [get_cells -quiet [list pcie4_uscale_plus_inst1]]
 add_cells_to_pblock [get_pblocks pblock_pcie1] [get_cells -quiet [list core_inst1/dma_if_pcie_us_inst]]
-resize_pblock [get_pblocks pblock_pcie1] -add {CLOCKREGION_X2Y5:CLOCKREGION_X5Y6}
+resize_pblock [get_pblocks pblock_pcie1] -add {CLOCKREGION_X1Y5:CLOCKREGION_X5Y6}
 
 create_pblock pblock_eth1
 add_cells_to_pblock [get_pblocks pblock_eth1] [get_cells -quiet [list qsfp1_1_cmac_pad_inst]]

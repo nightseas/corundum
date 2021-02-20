@@ -10,9 +10,9 @@ set_property -dict [list \
     CONFIG.extended_tag_field {true} \
     CONFIG.axisten_freq {250} \
     CONFIG.PF0_CLASS_CODE {020000} \
-    CONFIG.PF0_DEVICE_ID {1001} \
+    CONFIG.PF0_DEVICE_ID {3000} \
     CONFIG.PF0_MSI_CAP_MULTIMSGCAP {32_vectors} \
-    CONFIG.PF0_SUBSYSTEM_ID {1001} \
+    CONFIG.PF0_SUBSYSTEM_ID {3000} \
     CONFIG.PF0_SUBSYSTEM_VENDOR_ID {1234} \
     CONFIG.PF0_Use_Class_Code_Lookup_Assistant {true} \
     CONFIG.pf0_class_code_sub {00} \

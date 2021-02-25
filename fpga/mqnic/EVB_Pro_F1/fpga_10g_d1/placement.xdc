@@ -12,7 +12,8 @@ resize_pblock [get_pblocks pblock_slr1] -add {SLR1}
 #add_cells_to_pblock [get_pblocks pblock_slr2] [get_cells -quiet [list ]]
 #resize_pblock [get_pblocks pblock_slr2] -add {SLR2}
 
-create_pblock pblock_pcie
-add_cells_to_pblock [get_pblocks pblock_pcie] [get_cells -quiet [list pcie4_uscale_plus_inst]]
-add_cells_to_pblock [get_pblocks pblock_pcie] [get_cells -quiet [list core_inst/dma_if_pcie_us_inst]]
-resize_pblock [get_pblocks pblock_pcie] -add {CLOCKREGION_X4Y5:CLOCKREGION_X5Y9}
+# Enable below constraints for 6-interface design
+#create_pblock pblock_pcie
+#add_cells_to_pblock [get_pblocks pblock_pcie] [get_cells -quiet [list pcie4_uscale_plus_inst]]
+#add_cells_to_pblock [get_pblocks pblock_pcie] [get_cells -quiet [list core_inst/dma_if_pcie_us_inst]]
+#resize_pblock [get_pblocks pblock_pcie] -add {CLOCKREGION_X4Y5:CLOCKREGION_X5Y9}

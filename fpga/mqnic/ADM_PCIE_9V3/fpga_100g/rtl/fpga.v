@@ -872,10 +872,22 @@ qsfp_0_cmac_pad_inst (
 
 cmac_usplus_0
 qsfp_0_cmac_inst (
-    .gt_rxp_in({qsfp_0_rx_3_p, qsfp_0_rx_2_p, qsfp_0_rx_1_p, qsfp_0_rx_0_p}), // input
-    .gt_rxn_in({qsfp_0_rx_3_n, qsfp_0_rx_2_n, qsfp_0_rx_1_n, qsfp_0_rx_0_n}), // input
-    .gt_txp_out({qsfp_0_tx_3_p, qsfp_0_tx_2_p, qsfp_0_tx_1_p, qsfp_0_tx_0_p}), // output
-    .gt_txn_out({qsfp_0_tx_3_n, qsfp_0_tx_2_n, qsfp_0_tx_1_n, qsfp_0_tx_0_n}), // output
+    .gt0_rxp_in(qsfp_0_rx_0_p), // Fix for Vivado 2019.2 (CMAC v3.0)
+    .gt0_rxn_in(qsfp_0_rx_0_n),
+    .gt1_rxp_in(qsfp_0_rx_1_p),
+    .gt1_rxn_in(qsfp_0_rx_1_n),
+    .gt2_rxp_in(qsfp_0_rx_2_p),
+    .gt2_rxn_in(qsfp_0_rx_2_n),
+    .gt3_rxp_in(qsfp_0_rx_3_p),
+    .gt3_rxn_in(qsfp_0_rx_3_n),
+    .gt0_txp_out(qsfp_0_tx_0_p),
+    .gt0_txn_out(qsfp_0_tx_0_n),
+    .gt1_txp_out(qsfp_0_tx_1_p),
+    .gt1_txn_out(qsfp_0_tx_1_n),
+    .gt2_txp_out(qsfp_0_tx_2_p),
+    .gt2_txn_out(qsfp_0_tx_2_n),
+    .gt3_txp_out(qsfp_0_tx_3_p),
+    .gt3_txn_out(qsfp_0_tx_3_n),
     .gt_txusrclk2(qsfp_0_txuserclk2), // output
     .gt_loopback_in(12'd0), // input [11:0]
     .gt_rxrecclkout(), // output [3:0]
@@ -1156,10 +1168,22 @@ qsfp_1_cmac_pad_inst (
 
 cmac_usplus_1
 qsfp_1_cmac_inst (
-    .gt_rxp_in({qsfp_1_rx_3_p, qsfp_1_rx_2_p, qsfp_1_rx_1_p, qsfp_1_rx_0_p}), // input
-    .gt_rxn_in({qsfp_1_rx_3_n, qsfp_1_rx_2_n, qsfp_1_rx_1_n, qsfp_1_rx_0_n}), // input
-    .gt_txp_out({qsfp_1_tx_3_p, qsfp_1_tx_2_p, qsfp_1_tx_1_p, qsfp_1_tx_0_p}), // output
-    .gt_txn_out({qsfp_1_tx_3_n, qsfp_1_tx_2_n, qsfp_1_tx_1_n, qsfp_1_tx_0_n}), // output
+    .gt0_rxp_in(qsfp_1_rx_0_p), // Fix for Vivado 2019.2 (CMAC v3.0)
+    .gt0_rxn_in(qsfp_1_rx_0_n),
+    .gt1_rxp_in(qsfp_1_rx_1_p),
+    .gt1_rxn_in(qsfp_1_rx_1_n),
+    .gt2_rxp_in(qsfp_1_rx_2_p),
+    .gt2_rxn_in(qsfp_1_rx_2_n),
+    .gt3_rxp_in(qsfp_1_rx_3_p),
+    .gt3_rxn_in(qsfp_1_rx_3_n),
+    .gt0_txp_out(qsfp_1_tx_0_p),
+    .gt0_txn_out(qsfp_1_tx_0_n),
+    .gt1_txp_out(qsfp_1_tx_1_p),
+    .gt1_txn_out(qsfp_1_tx_1_n),
+    .gt2_txp_out(qsfp_1_tx_2_p),
+    .gt2_txn_out(qsfp_1_tx_2_n),
+    .gt3_txp_out(qsfp_1_tx_3_p),
+    .gt3_txn_out(qsfp_1_tx_3_n),
     .gt_txusrclk2(qsfp_1_txuserclk2), // output
     .gt_loopback_in(12'd0), // input [11:0]
     .gt_rxrecclkout(), // output [3:0]

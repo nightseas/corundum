@@ -109,14 +109,14 @@ program: $(FPGA_TOP).bit
 	echo "open_hw" > program.tcl
 	echo "connect_hw_server" >> program.tcl
 	echo "open_hw_target" >> program.tcl
-	echo "current_hw_device [lindex [get_hw_devices] 0]" >> program.tcl
+	echo "current_hw_device [lindex [get_hw_devices] 1]" >> program.tcl
 	echo "refresh_hw_device -update_hw_probes false [current_hw_device]" >> program.tcl
 	echo "set_property PROGRAM.FILE {$(FPGA_TOP).bit} [current_hw_device]" >> program.tcl
 	echo "program_hw_devices [current_hw_device]" >> program.tcl
 	echo "exit" >> program.tcl
 	vivado -nojournal -nolog -mode batch -source program.tcl
 
-%_primary.mcs %_secondary.mcs %_primary.prm %_secondary.prm: %.bit
+%.mcs %.prm: %.bit
 	echo "write_cfgmem -force -format mcs -size 256 -interface SPIx4 -loadbit {up 0x08000000 $*.bit} -checksum -file $*.mcs" > generate_mcs.tcl
 	echo "exit" >> generate_mcs.tcl
 	vivado -nojournal -nolog -mode batch -source generate_mcs.tcl
@@ -125,11 +125,11 @@ program: $(FPGA_TOP).bit
 	while [ -e rev/$*_rev$$COUNT.bit ]; \
 	do COUNT=$$((COUNT+1)); done; \
 	COUNT=$$((COUNT-1)); \
-	for x in _primary.mcs _secondary.mcs _primary.prm _secondary.prm; \
+	for x in .mcs .prm; \
 	do cp $*$$x rev/$*_rev$$COUNT$$x; \
 	echo "Output: rev/$*_rev$$COUNT$$x"; done;
 
-%_fallback_primary.mcs %_fallback_secondary.mcs %_fallback_primary.prm %_fallback_secondary.prm: %_fallback.bit
+%_fallback.mcs %_fallback.prm: %_fallback.bit
 	echo "write_cfgmem -force -format mcs -size 256 -interface SPIx4 -loadbit {up 0x00000000 $*_fallback.bit} -checksum -file $*_fallback.mcs" > generate_fallback_mcs.tcl
 	echo "exit" >> generate_fallback_mcs.tcl
 	vivado -nojournal -nolog -mode batch -source generate_fallback_mcs.tcl
@@ -138,11 +138,11 @@ program: $(FPGA_TOP).bit
 	while [ -e rev/$*_rev$$COUNT.bit ]; \
 	do COUNT=$$((COUNT+1)); done; \
 	COUNT=$$((COUNT-1)); \
-	for x in _primary.mcs _secondary.mcs _primary.prm _secondary.prm; \
+	for x in .mcs .prm; \
 	do cp $*_fallback$$x rev/$*_fallback_rev$$COUNT$$x; \
 	echo "Output: rev/$*_fallback_rev$$COUNT$$x"; done;
 
-%_full_primary.mcs %_full_secondary.mcs %_full_primary.prm %_full_secondary.prm: %_fallback.bit %.bit
+%_full.mcs %_full.prm: %_fallback.bit %.bit
 	echo "write_cfgmem -force -format mcs -size 256 -interface SPIx4 -loadbit {up 0x00000000 $*_fallback.bit up 0x08000000 $*.bit} -checksum -file $*_full.mcs" > generate_full_mcs.tcl
 	echo "exit" >> generate_full_mcs.tcl
 	vivado -nojournal -nolog -mode batch -source generate_full_mcs.tcl
@@ -151,20 +151,20 @@ program: $(FPGA_TOP).bit
 	while [ -e rev/$*_rev$$COUNT.bit ]; \
 	do COUNT=$$((COUNT+1)); done; \
 	COUNT=$$((COUNT-1)); \
-	for x in _primary.mcs _secondary.mcs _primary.prm _secondary.prm; \
+	for x in .mcs .prm; \
 	do cp $*_full$$x rev/$*_full_rev$$COUNT$$x; \
 	echo "Output: rev/$*_full_rev$$COUNT$$x"; done;
 
-flash: $(FPGA_TOP)_primary.mcs $(FPGA_TOP)_secondary.mcs $(FPGA_TOP)_primary.prm $(FPGA_TOP)_secondary.prm
+flash: $(FPGA_TOP).mcs $(FPGA_TOP).prm
 	echo "open_hw" > flash.tcl
 	echo "connect_hw_server" >> flash.tcl
 	echo "open_hw_target" >> flash.tcl
-	echo "current_hw_device [lindex [get_hw_devices] 0]" >> flash.tcl
+	echo "current_hw_device [lindex [get_hw_devices] 1]" >> flash.tcl
 	echo "refresh_hw_device -update_hw_probes false [current_hw_device]" >> flash.tcl
 	echo "create_hw_cfgmem -hw_device [current_hw_device] [lindex [get_cfgmem_parts {mt25qu02g-spi-x1_x2_x4}] 0]" >> flash.tcl
 	echo "current_hw_cfgmem -hw_device [current_hw_device] [get_property PROGRAM.HW_CFGMEM [current_hw_device]]" >> flash.tcl
-	echo "set_property PROGRAM.FILES [list \"$(FPGA_TOP)_primary.mcs\" \"$(FPGA_TOP)_secondary.mcs\"] [current_hw_cfgmem]" >> flash.tcl
-	echo "set_property PROGRAM.PRM_FILES [list \"$(FPGA_TOP)_primary.prm\" \"$(FPGA_TOP)_secondary.prm\"] [current_hw_cfgmem]" >> flash.tcl
+	echo "set_property PROGRAM.FILES [list \"$(FPGA_TOP).mcs\"] [current_hw_cfgmem]" >> flash.tcl
+	echo "set_property PROGRAM.PRM_FILES [list \"$(FPGA_TOP).prm\"] [current_hw_cfgmem]" >> flash.tcl
 	echo "set_property PROGRAM.ERASE 1 [current_hw_cfgmem]" >> flash.tcl
 	echo "set_property PROGRAM.CFG_PROGRAM 1 [current_hw_cfgmem]" >> flash.tcl
 	echo "set_property PROGRAM.VERIFY 1 [current_hw_cfgmem]" >> flash.tcl
@@ -179,16 +179,16 @@ flash: $(FPGA_TOP)_primary.mcs $(FPGA_TOP)_secondary.mcs $(FPGA_TOP)_primary.prm
 	echo "exit" >> flash.tcl
 	vivado -nojournal -nolog -mode batch -source flash.tcl
 
-flash%: $(FPGA_TOP)%_primary.mcs $(FPGA_TOP)%_secondary.mcs $(FPGA_TOP)%_primary.prm $(FPGA_TOP)%_secondary.prm
+flash%: $(FPGA_TOP)%.mcs $(FPGA_TOP)%.prm
 	echo "open_hw" > flash$*.tcl
 	echo "connect_hw_server" >> flash$*.tcl
 	echo "open_hw_target" >> flash$*.tcl
-	echo "current_hw_device [lindex [get_hw_devices] 0]" >> flash$*.tcl
+	echo "current_hw_device [lindex [get_hw_devices] 1]" >> flash$*.tcl
 	echo "refresh_hw_device -update_hw_probes false [current_hw_device]" >> flash$*.tcl
 	echo "create_hw_cfgmem -hw_device [current_hw_device] [lindex [get_cfgmem_parts {mt25qu02g-spi-x1_x2_x4}] 0]" >> flash$*.tcl
 	echo "current_hw_cfgmem -hw_device [current_hw_device] [get_property PROGRAM.HW_CFGMEM [current_hw_device]]" >> flash$*.tcl
-	echo "set_property PROGRAM.FILES [list \"$(FPGA_TOP)$*_primary.mcs\" \"$(FPGA_TOP)$*_secondary.mcs\"] [current_hw_cfgmem]" >> flash$*.tcl
-	echo "set_property PROGRAM.PRM_FILES [list \"$(FPGA_TOP)$*_primary.prm\" \"$(FPGA_TOP)$*_secondary.prm\"] [current_hw_cfgmem]" >> flash$*.tcl
+	echo "set_property PROGRAM.FILES [list \"$(FPGA_TOP)$*.mcs\"] [current_hw_cfgmem]" >> flash$*.tcl
+	echo "set_property PROGRAM.PRM_FILES [list \"$(FPGA_TOP)$*.prm\"] [current_hw_cfgmem]" >> flash$*.tcl
 	echo "set_property PROGRAM.ERASE 1 [current_hw_cfgmem]" >> flash$*.tcl
 	echo "set_property PROGRAM.CFG_PROGRAM 1 [current_hw_cfgmem]" >> flash$*.tcl
 	echo "set_property PROGRAM.VERIFY 1 [current_hw_cfgmem]" >> flash$*.tcl

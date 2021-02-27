@@ -1111,8 +1111,8 @@ qsfp_gty_inst0 (
     .gtwiz_userclk_tx_active_in(&gt0_userclk_tx_active),
     .gtwiz_userclk_rx_active_in(&gt0_userclk_rx_active),
 
-    .gtwiz_reset_clk_freerun_in(clk_125mhz_int2),
-    .gtwiz_reset_all_in(rst_125mhz_int2),
+    .gtwiz_reset_clk_freerun_in(clk_125mhz_int0),
+    .gtwiz_reset_all_in(rst_125mhz_int0),
 
     .gtwiz_reset_tx_pll_and_datapath_in(1'b0),
     .gtwiz_reset_tx_datapath_in(1'b0),
@@ -2214,8 +2214,8 @@ qsfp_gty_inst1 (
     .gtwiz_userclk_tx_active_in(&gt1_userclk_tx_active),
     .gtwiz_userclk_rx_active_in(&gt1_userclk_rx_active),
 
-    .gtwiz_reset_clk_freerun_in(clk_125mhz_int2),
-    .gtwiz_reset_all_in(rst_125mhz_int2),
+    .gtwiz_reset_clk_freerun_in(clk_125mhz_int1),
+    .gtwiz_reset_all_in(rst_125mhz_int1),
 
     .gtwiz_reset_tx_pll_and_datapath_in(1'b0),
     .gtwiz_reset_tx_datapath_in(1'b0),

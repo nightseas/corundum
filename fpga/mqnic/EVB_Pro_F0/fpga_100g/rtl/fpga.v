@@ -486,7 +486,7 @@ assign icap_di_rev[26] = icap_di_reg[29];
 assign icap_di_rev[25] = icap_di_reg[30];
 assign icap_di_rev[24] = icap_di_reg[31];
 
-always @(posedge clk_125mhz_int) begin
+always @(posedge clk_125mhz_int1) begin
     case (icap_state)
         0: begin
             icap_state <= 0;
@@ -541,7 +541,7 @@ end
 ICAPE3
 icape3_inst (
     .AVAIL(icap_avail),
-    .CLK(clk_125mhz_int),
+    .CLK(clk_125mhz_int1),
     .CSIB(icap_csib_reg),
     .I(icap_di_rev),
     .O(),
@@ -923,10 +923,10 @@ qsfp0_1_cmac_inst (
     .gt_ref_clk_out(), // output
     .gtwiz_reset_tx_datapath(1'b0), // input
     .gtwiz_reset_rx_datapath(1'b0), // input
-    .sys_reset(rst_125mhz_int1), // input
+    .sys_reset(rst_125mhz_int0), // input
     .gt_ref_clk_p(qsfp0_1_mgt_refclk_0_p), // input
     .gt_ref_clk_n(qsfp0_1_mgt_refclk_0_n), // input
-    .init_clk(clk_125mhz_int1), // input
+    .init_clk(clk_125mhz_int0), // input
 
     .rx_axis_tvalid(qsfp0_1_rx_axis_tvalid_int), // output
     .rx_axis_tdata(qsfp0_1_rx_axis_tdata_int), // output [511:0]
@@ -1219,10 +1219,10 @@ qsfp0_2_cmac_inst (
     .gt_ref_clk_out(), // output
     .gtwiz_reset_tx_datapath(1'b0), // input
     .gtwiz_reset_rx_datapath(1'b0), // input
-    .sys_reset(rst_125mhz_int1), // input
+    .sys_reset(rst_125mhz_int0), // input
     .gt_ref_clk_p(qsfp0_2_mgt_refclk_0_p), // input
     .gt_ref_clk_n(qsfp0_2_mgt_refclk_0_n), // input
-    .init_clk(clk_125mhz_int1), // input
+    .init_clk(clk_125mhz_int0), // input
 
     .rx_axis_tvalid(qsfp0_2_rx_axis_tvalid_int), // output
     .rx_axis_tdata(qsfp0_2_rx_axis_tdata_int), // output [511:0]
@@ -3051,10 +3051,10 @@ qsfp2_1_cmac_inst (
     .gt_ref_clk_out(), // output
     .gtwiz_reset_tx_datapath(1'b0), // input
     .gtwiz_reset_rx_datapath(1'b0), // input
-    .sys_reset(rst_125mhz_int1), // input
+    .sys_reset(rst_125mhz_int2), // input
     .gt_ref_clk_p(qsfp2_1_mgt_refclk_0_p), // input
     .gt_ref_clk_n(qsfp2_1_mgt_refclk_0_n), // input
-    .init_clk(clk_125mhz_int1), // input
+    .init_clk(clk_125mhz_int2), // input
 
     .rx_axis_tvalid(qsfp2_1_rx_axis_tvalid_int), // output
     .rx_axis_tdata(qsfp2_1_rx_axis_tdata_int), // output [511:0]
@@ -3347,10 +3347,10 @@ qsfp2_2_cmac_inst (
     .gt_ref_clk_out(), // output
     .gtwiz_reset_tx_datapath(1'b0), // input
     .gtwiz_reset_rx_datapath(1'b0), // input
-    .sys_reset(rst_125mhz_int1), // input
+    .sys_reset(rst_125mhz_int2), // input
     .gt_ref_clk_p(qsfp2_2_mgt_refclk_0_p), // input
     .gt_ref_clk_n(qsfp2_2_mgt_refclk_0_n), // input
-    .init_clk(clk_125mhz_int1), // input
+    .init_clk(clk_125mhz_int2), // input
 
     .rx_axis_tvalid(qsfp2_2_rx_axis_tvalid_int), // output
     .rx_axis_tdata(qsfp2_2_rx_axis_tdata_int), // output [511:0]

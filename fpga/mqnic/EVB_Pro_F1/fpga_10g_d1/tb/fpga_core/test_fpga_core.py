@@ -80,7 +80,7 @@ class TB(object):
         self.dev = UltraScalePlusPcieDevice(
             # configuration options
             pcie_generation=3,
-            pcie_link_width=16,
+            pcie_link_width=8,
             user_clk_frequency=250e6,
             alignment="dword",
             cq_cc_straddle=False,

@@ -622,7 +622,7 @@ def test_fpga_core(request):
 
     parameters = {}
 
-    parameters['AXIS_PCIE_DATA_WIDTH'] = 512
+    parameters['AXIS_PCIE_DATA_WIDTH'] = 256
     parameters['AXIS_PCIE_KEEP_WIDTH'] = parameters['AXIS_PCIE_DATA_WIDTH'] // 32
     parameters['AXIS_PCIE_RQ_USER_WIDTH'] = 62 if parameters['AXIS_PCIE_DATA_WIDTH'] < 512 else 137
     parameters['AXIS_PCIE_RC_USER_WIDTH'] = 75 if parameters['AXIS_PCIE_DATA_WIDTH'] < 512 else 161

@@ -73,6 +73,15 @@ module fpga_core #
     output wire                               pps_out_en,
 
     /*
+     * BMC interface
+     */
+    output wire                               bmc_clk,
+    output wire                               bmc_nss,
+    output wire                               bmc_mosi,
+    input  wire                               bmc_miso,
+    input  wire                               bmc_int,
+
+    /*
      * PCIe
      */
     output wire [AXIS_PCIE_DATA_WIDTH-1:0]    m_axis_rq_tdata,
@@ -375,6 +384,7 @@ wire [SEG_COUNT*SEG_ADDR_WIDTH-1:0]  dma_ram_wr_cmd_addr;
 wire [SEG_COUNT*SEG_DATA_WIDTH-1:0]  dma_ram_wr_cmd_data;
 wire [SEG_COUNT-1:0]                 dma_ram_wr_cmd_valid;
 wire [SEG_COUNT-1:0]                 dma_ram_wr_cmd_ready;
+wire [SEG_COUNT-1:0]                 dma_ram_wr_done;
 wire [SEG_COUNT*RAM_SEL_WIDTH-1:0]   dma_ram_rd_cmd_sel;
 wire [SEG_COUNT*SEG_ADDR_WIDTH-1:0]  dma_ram_rd_cmd_addr;
 wire [SEG_COUNT-1:0]                 dma_ram_rd_cmd_valid;
@@ -450,6 +460,15 @@ reg qspi_cs_reg = 1'b1;
 reg [3:0] qspi_dq_o_reg = 4'd0;
 reg [3:0] qspi_dq_oe_reg = 4'd0;
 
+reg [15:0] bmc_ctrl_cmd_reg = 16'd0;
+reg [31:0] bmc_ctrl_data_reg = 32'd0;
+reg bmc_ctrl_valid_reg = 1'b0;
+
+wire [15:0] bmc_read_data;
+wire bmc_status_idle;
+wire bmc_status_done;
+wire bmc_status_timeout;
+
 reg pcie_dma_enable_reg = 0;
 
 reg [95:0] get_ptp_ts_96_reg = 0;
@@ -509,6 +528,8 @@ always @(posedge clk_250mhz) begin
     axil_csr_bvalid_reg <= axil_csr_bvalid_reg && !axil_csr_bready;
     axil_csr_arready_reg <= 1'b0;
     axil_csr_rvalid_reg <= axil_csr_rvalid_reg && !axil_csr_rready;
+
+    bmc_ctrl_valid_reg <= 1'b0;
 
     pcie_dma_enable_reg <= pcie_dma_enable_reg;
 
@@ -574,6 +595,14 @@ always @(posedge clk_250mhz) begin
                     qspi_clk_reg <= axil_csr_wdata[16];
                     qspi_cs_reg <= axil_csr_wdata[17];
                 end
+            end
+            // BMC
+            16'h0180: begin
+                bmc_ctrl_data_reg <= axil_csr_wdata;
+            end
+            16'h0184: begin
+                bmc_ctrl_cmd_reg <= axil_csr_wdata[31:16];
+                bmc_ctrl_valid_reg <= 1'b1;
             end
             // PHC
             16'h0230: set_ptp_ts_96_reg[15:0] <= axil_csr_wdata;  // PTP set fns
@@ -681,6 +710,19 @@ always @(posedge clk_250mhz) begin
                 axil_csr_rdata_reg[16] <= qspi_clk;
                 axil_csr_rdata_reg[17] <= qspi_cs;
             end
+            // BMC
+            16'h0180: begin
+                axil_csr_rdata_reg <= bmc_ctrl_data_reg;
+            end
+            16'h0184: begin
+                axil_csr_rdata_reg[31:16] <= bmc_ctrl_cmd_reg;
+            end
+            16'h0188: begin
+                axil_csr_rdata_reg[15:0] <= bmc_read_data;
+                axil_csr_rdata_reg[16] <= bmc_status_done;
+                axil_csr_rdata_reg[18] <= bmc_status_timeout;
+                axil_csr_rdata_reg[19] <= bmc_status_idle;
+            end
             // PHC
             16'h0200: axil_csr_rdata_reg <= {8'd0, 8'd0, 8'd0, 8'd1};  // PHC features
             16'h0210: axil_csr_rdata_reg <= ptp_ts_96[15:0];  // PTP cur fns
@@ -760,6 +802,32 @@ always @(posedge clk_250mhz) begin
         ptp_perout_enable_reg <= 1'b0;
     end
 end
+
+bmc_spi #(
+    .PRESCALE(125),
+    .BYTE_WAIT(32),
+    .TIMEOUT(5000)
+)
+bmc_spi_inst (
+    .clk(clk_250mhz),
+    .rst(rst_250mhz),
+
+    .ctrl_cmd(bmc_ctrl_cmd_reg),
+    .ctrl_data(bmc_ctrl_data_reg),
+    .ctrl_valid(bmc_ctrl_valid_reg),
+
+    .read_data(bmc_read_data),
+
+    .status_idle(bmc_status_idle),
+    .status_done(bmc_status_done),
+    .status_timeout(bmc_status_timeout),
+
+    .bmc_clk(bmc_clk),
+    .bmc_nss(bmc_nss),
+    .bmc_mosi(bmc_mosi),
+    .bmc_miso(bmc_miso),
+    .bmc_int(bmc_int)
+);
 
 pcie_us_cfg #(
     .PF_COUNT(1),
@@ -998,7 +1066,6 @@ dma_if_pcie_us #
     .RAM_ADDR_WIDTH(RAM_ADDR_WIDTH),
     .PCIE_ADDR_WIDTH(PCIE_ADDR_WIDTH),
     .PCIE_TAG_COUNT(64),
-    .PCIE_EXT_TAG_ENABLE(1),
     .LEN_WIDTH(PCIE_DMA_LEN_WIDTH),
     .TAG_WIDTH(PCIE_DMA_TAG_WIDTH),
     .READ_OP_TABLE_SIZE(64),
@@ -1090,6 +1157,7 @@ dma_if_pcie_us_inst (
     .ram_wr_cmd_data(dma_ram_wr_cmd_data),
     .ram_wr_cmd_valid(dma_ram_wr_cmd_valid),
     .ram_wr_cmd_ready(dma_ram_wr_cmd_ready),
+    .ram_wr_done(dma_ram_wr_done),
     .ram_rd_cmd_sel(dma_ram_rd_cmd_sel),
     .ram_rd_cmd_addr(dma_ram_rd_cmd_addr),
     .ram_rd_cmd_valid(dma_ram_rd_cmd_valid),
@@ -1366,6 +1434,7 @@ wire [SEG_COUNT*SEG_ADDR_WIDTH-1:0]     ctrl_dma_ram_wr_cmd_addr;
 wire [SEG_COUNT*SEG_DATA_WIDTH-1:0]     ctrl_dma_ram_wr_cmd_data;
 wire [SEG_COUNT-1:0]                    ctrl_dma_ram_wr_cmd_valid;
 wire [SEG_COUNT-1:0]                    ctrl_dma_ram_wr_cmd_ready;
+wire [SEG_COUNT-1:0]                    ctrl_dma_ram_wr_done;
 wire [SEG_COUNT*(RAM_SEL_WIDTH-1)-1:0]  ctrl_dma_ram_rd_cmd_sel;
 wire [SEG_COUNT*SEG_ADDR_WIDTH-1:0]     ctrl_dma_ram_rd_cmd_addr;
 wire [SEG_COUNT-1:0]                    ctrl_dma_ram_rd_cmd_valid;
@@ -1380,6 +1449,7 @@ wire [SEG_COUNT*SEG_ADDR_WIDTH-1:0]     data_dma_ram_wr_cmd_addr;
 wire [SEG_COUNT*SEG_DATA_WIDTH-1:0]     data_dma_ram_wr_cmd_data;
 wire [SEG_COUNT-1:0]                    data_dma_ram_wr_cmd_valid;
 wire [SEG_COUNT-1:0]                    data_dma_ram_wr_cmd_ready;
+wire [SEG_COUNT-1:0]                    data_dma_ram_wr_done;
 wire [SEG_COUNT*(RAM_SEL_WIDTH-1)-1:0]  data_dma_ram_rd_cmd_sel;
 wire [SEG_COUNT*SEG_ADDR_WIDTH-1:0]     data_dma_ram_rd_cmd_addr;
 wire [SEG_COUNT-1:0]                    data_dma_ram_rd_cmd_valid;
@@ -1486,6 +1556,7 @@ dma_if_mux_inst (
     .if_ram_wr_cmd_data(dma_ram_wr_cmd_data),
     .if_ram_wr_cmd_valid(dma_ram_wr_cmd_valid),
     .if_ram_wr_cmd_ready(dma_ram_wr_cmd_ready),
+    .if_ram_wr_done(dma_ram_wr_done),
     .if_ram_rd_cmd_sel(dma_ram_rd_cmd_sel),
     .if_ram_rd_cmd_addr(dma_ram_rd_cmd_addr),
     .if_ram_rd_cmd_valid(dma_ram_rd_cmd_valid),
@@ -1503,6 +1574,7 @@ dma_if_mux_inst (
     .ram_wr_cmd_data({data_dma_ram_wr_cmd_data, ctrl_dma_ram_wr_cmd_data}),
     .ram_wr_cmd_valid({data_dma_ram_wr_cmd_valid, ctrl_dma_ram_wr_cmd_valid}),
     .ram_wr_cmd_ready({data_dma_ram_wr_cmd_ready, ctrl_dma_ram_wr_cmd_ready}),
+    .ram_wr_done({data_dma_ram_wr_done, ctrl_dma_ram_wr_done}),
     .ram_rd_cmd_sel({data_dma_ram_rd_cmd_sel, ctrl_dma_ram_rd_cmd_sel}),
     .ram_rd_cmd_addr({data_dma_ram_rd_cmd_addr, ctrl_dma_ram_rd_cmd_addr}),
     .ram_rd_cmd_valid({data_dma_ram_rd_cmd_valid, ctrl_dma_ram_rd_cmd_valid}),
@@ -1562,6 +1634,7 @@ wire [IF_COUNT*SEG_COUNT*SEG_ADDR_WIDTH-1:0]   if_ctrl_dma_ram_wr_cmd_addr;
 wire [IF_COUNT*SEG_COUNT*SEG_DATA_WIDTH-1:0]   if_ctrl_dma_ram_wr_cmd_data;
 wire [IF_COUNT*SEG_COUNT-1:0]                  if_ctrl_dma_ram_wr_cmd_valid;
 wire [IF_COUNT*SEG_COUNT-1:0]                  if_ctrl_dma_ram_wr_cmd_ready;
+wire [IF_COUNT*SEG_COUNT-1:0]                  if_ctrl_dma_ram_wr_done;
 wire [IF_COUNT*SEG_COUNT*IF_RAM_SEL_WIDTH-1:0] if_ctrl_dma_ram_rd_cmd_sel;
 wire [IF_COUNT*SEG_COUNT*SEG_ADDR_WIDTH-1:0]   if_ctrl_dma_ram_rd_cmd_addr;
 wire [IF_COUNT*SEG_COUNT-1:0]                  if_ctrl_dma_ram_rd_cmd_valid;
@@ -1576,6 +1649,7 @@ wire [IF_COUNT*SEG_COUNT*SEG_ADDR_WIDTH-1:0]   if_data_dma_ram_wr_cmd_addr;
 wire [IF_COUNT*SEG_COUNT*SEG_DATA_WIDTH-1:0]   if_data_dma_ram_wr_cmd_data;
 wire [IF_COUNT*SEG_COUNT-1:0]                  if_data_dma_ram_wr_cmd_valid;
 wire [IF_COUNT*SEG_COUNT-1:0]                  if_data_dma_ram_wr_cmd_ready;
+wire [IF_COUNT*SEG_COUNT-1:0]                  if_data_dma_ram_wr_done;
 wire [IF_COUNT*SEG_COUNT*IF_RAM_SEL_WIDTH-1:0] if_data_dma_ram_rd_cmd_sel;
 wire [IF_COUNT*SEG_COUNT*SEG_ADDR_WIDTH-1:0]   if_data_dma_ram_rd_cmd_addr;
 wire [IF_COUNT*SEG_COUNT-1:0]                  if_data_dma_ram_rd_cmd_valid;
@@ -1684,6 +1758,7 @@ if (IF_COUNT > 1) begin
         .if_ram_wr_cmd_data(ctrl_dma_ram_wr_cmd_data),
         .if_ram_wr_cmd_valid(ctrl_dma_ram_wr_cmd_valid),
         .if_ram_wr_cmd_ready(ctrl_dma_ram_wr_cmd_ready),
+        .if_ram_wr_done(ctrl_dma_ram_wr_done),
         .if_ram_rd_cmd_sel(ctrl_dma_ram_rd_cmd_sel),
         .if_ram_rd_cmd_addr(ctrl_dma_ram_rd_cmd_addr),
         .if_ram_rd_cmd_valid(ctrl_dma_ram_rd_cmd_valid),
@@ -1701,6 +1776,7 @@ if (IF_COUNT > 1) begin
         .ram_wr_cmd_data(if_ctrl_dma_ram_wr_cmd_data),
         .ram_wr_cmd_valid(if_ctrl_dma_ram_wr_cmd_valid),
         .ram_wr_cmd_ready(if_ctrl_dma_ram_wr_cmd_ready),
+        .ram_wr_done(if_ctrl_dma_ram_wr_done),
         .ram_rd_cmd_sel(if_ctrl_dma_ram_rd_cmd_sel),
         .ram_rd_cmd_addr(if_ctrl_dma_ram_rd_cmd_addr),
         .ram_rd_cmd_valid(if_ctrl_dma_ram_rd_cmd_valid),
@@ -1808,6 +1884,7 @@ if (IF_COUNT > 1) begin
         .if_ram_wr_cmd_data(data_dma_ram_wr_cmd_data),
         .if_ram_wr_cmd_valid(data_dma_ram_wr_cmd_valid),
         .if_ram_wr_cmd_ready(data_dma_ram_wr_cmd_ready),
+        .if_ram_wr_done(data_dma_ram_wr_done),
         .if_ram_rd_cmd_sel(data_dma_ram_rd_cmd_sel),
         .if_ram_rd_cmd_addr(data_dma_ram_rd_cmd_addr),
         .if_ram_rd_cmd_valid(data_dma_ram_rd_cmd_valid),
@@ -1825,6 +1902,7 @@ if (IF_COUNT > 1) begin
         .ram_wr_cmd_data(if_data_dma_ram_wr_cmd_data),
         .ram_wr_cmd_valid(if_data_dma_ram_wr_cmd_valid),
         .ram_wr_cmd_ready(if_data_dma_ram_wr_cmd_ready),
+        .ram_wr_done(if_data_dma_ram_wr_done),
         .ram_rd_cmd_sel(if_data_dma_ram_rd_cmd_sel),
         .ram_rd_cmd_addr(if_data_dma_ram_rd_cmd_addr),
         .ram_rd_cmd_valid(if_data_dma_ram_rd_cmd_valid),
@@ -1864,6 +1942,7 @@ end else begin
     assign if_ctrl_dma_ram_wr_cmd_data = ctrl_dma_ram_wr_cmd_data;
     assign if_ctrl_dma_ram_wr_cmd_valid = ctrl_dma_ram_wr_cmd_valid;
     assign ctrl_dma_ram_wr_cmd_ready = if_ctrl_dma_ram_wr_cmd_ready;
+    assign ctrl_dma_ram_wr_done = if_ctrl_dma_ram_wr_done;
     assign if_ctrl_dma_ram_rd_cmd_sel = ctrl_dma_ram_rd_cmd_sel;
     assign if_ctrl_dma_ram_rd_cmd_addr = ctrl_dma_ram_rd_cmd_addr;
     assign if_ctrl_dma_ram_rd_cmd_valid = ctrl_dma_ram_rd_cmd_valid;
@@ -1900,6 +1979,7 @@ end else begin
     assign if_data_dma_ram_wr_cmd_data = data_dma_ram_wr_cmd_data;
     assign if_data_dma_ram_wr_cmd_valid = data_dma_ram_wr_cmd_valid;
     assign data_dma_ram_wr_cmd_ready = if_data_dma_ram_wr_cmd_ready;
+    assign data_dma_ram_wr_done = if_data_dma_ram_wr_done;
     assign if_data_dma_ram_rd_cmd_sel = data_dma_ram_rd_cmd_sel;
     assign if_data_dma_ram_rd_cmd_addr = data_dma_ram_rd_cmd_addr;
     assign if_data_dma_ram_rd_cmd_valid = data_dma_ram_rd_cmd_valid;
@@ -2310,6 +2390,7 @@ generate
             .ctrl_dma_ram_wr_cmd_data(if_ctrl_dma_ram_wr_cmd_data[SEG_COUNT*SEG_DATA_WIDTH*n +: SEG_COUNT*SEG_DATA_WIDTH]),
             .ctrl_dma_ram_wr_cmd_valid(if_ctrl_dma_ram_wr_cmd_valid[SEG_COUNT*n +: SEG_COUNT]),
             .ctrl_dma_ram_wr_cmd_ready(if_ctrl_dma_ram_wr_cmd_ready[SEG_COUNT*n +: SEG_COUNT]),
+            .ctrl_dma_ram_wr_done(if_ctrl_dma_ram_wr_done[SEG_COUNT*n +: SEG_COUNT]),
             .ctrl_dma_ram_rd_cmd_sel(if_ctrl_dma_ram_rd_cmd_sel[SEG_COUNT*IF_RAM_SEL_WIDTH*n +: SEG_COUNT*IF_RAM_SEL_WIDTH]),
             .ctrl_dma_ram_rd_cmd_addr(if_ctrl_dma_ram_rd_cmd_addr[SEG_COUNT*SEG_ADDR_WIDTH*n +: SEG_COUNT*SEG_ADDR_WIDTH]),
             .ctrl_dma_ram_rd_cmd_valid(if_ctrl_dma_ram_rd_cmd_valid[SEG_COUNT*n +: SEG_COUNT]),
@@ -2327,6 +2408,7 @@ generate
             .data_dma_ram_wr_cmd_data(if_data_dma_ram_wr_cmd_data[SEG_COUNT*SEG_DATA_WIDTH*n +: SEG_COUNT*SEG_DATA_WIDTH]),
             .data_dma_ram_wr_cmd_valid(if_data_dma_ram_wr_cmd_valid[SEG_COUNT*n +: SEG_COUNT]),
             .data_dma_ram_wr_cmd_ready(if_data_dma_ram_wr_cmd_ready[SEG_COUNT*n +: SEG_COUNT]),
+            .data_dma_ram_wr_done(if_data_dma_ram_wr_done[SEG_COUNT*n +: SEG_COUNT]),
             .data_dma_ram_rd_cmd_sel(if_data_dma_ram_rd_cmd_sel[SEG_COUNT*IF_RAM_SEL_WIDTH*n +: SEG_COUNT*IF_RAM_SEL_WIDTH]),
             .data_dma_ram_rd_cmd_addr(if_data_dma_ram_rd_cmd_addr[SEG_COUNT*SEG_ADDR_WIDTH*n +: SEG_COUNT*SEG_ADDR_WIDTH]),
             .data_dma_ram_rd_cmd_valid(if_data_dma_ram_rd_cmd_valid[SEG_COUNT*n +: SEG_COUNT]),

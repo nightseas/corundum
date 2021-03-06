@@ -68,12 +68,12 @@ SYN_FILES += lib/pcie/rtl/dma_client_axis_sink.v
 SYN_FILES += lib/pcie/rtl/dma_client_axis_source.v
 SYN_FILES += lib/pcie/rtl/pcie_us_cfg.v
 SYN_FILES += lib/pcie/rtl/pcie_us_msi.v
-SYN_FILES += lib/pcie/rtl/pcie_tag_manager.v
 SYN_FILES += lib/pcie/rtl/pulse_merge.v
 
 # XDC files
 XDC_FILES = fpga.xdc
 XDC_FILES += placement.xdc
+XDC_FILES += cfgmclk.xdc
 XDC_FILES += boot.xdc
 XDC_FILES += lib/axi/syn/axil_cdc.tcl
 XDC_FILES += lib/axis/syn/axis_async_fifo.tcl

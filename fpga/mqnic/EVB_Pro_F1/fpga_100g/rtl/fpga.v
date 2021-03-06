@@ -645,6 +645,20 @@ wire [3:0]  cfg0_interrupt_msi_function_number;
 wire status0_error_cor;
 wire status0_error_uncor;
 
+// extra register for pcie0_user_reset signal
+wire pcie0_user_reset_int;
+(* shreg_extract = "no" *)
+reg pcie0_user_reset_reg_1 = 1'b1;
+(* shreg_extract = "no" *)
+reg pcie0_user_reset_reg_2 = 1'b1;
+
+always @(posedge pcie0_user_clk) begin
+    pcie0_user_reset_reg_1 <= pcie0_user_reset_int;
+    pcie0_user_reset_reg_2 <= pcie0_user_reset_reg_1;
+end
+
+assign pcie0_user_reset = pcie0_user_reset_reg_2;
+
 pcie4_uscale_plus_0
 pcie4_uscale_plus_inst0 (
     .pci_exp_txn(pcie0_tx_n),
@@ -652,7 +666,7 @@ pcie4_uscale_plus_inst0 (
     .pci_exp_rxn(pcie0_rx_n),
     .pci_exp_rxp(pcie0_rx_p),
     .user_clk(pcie0_user_clk),
-    .user_reset(pcie0_user_reset),
+    .user_reset(pcie0_user_reset_int),
     .user_lnk_up(),
 
     .s_axis_rq_tdata(axis0_rq_tdata),
@@ -1709,6 +1723,20 @@ wire [3:0]  cfg1_interrupt_msi_function_number;
 wire status1_error_cor;
 wire status1_error_uncor;
 
+// extra register for pcie1_user_reset signal
+wire pcie1_user_reset_int;
+(* shreg_extract = "no" *)
+reg pcie1_user_reset_reg_1 = 1'b1;
+(* shreg_extract = "no" *)
+reg pcie1_user_reset_reg_2 = 1'b1;
+
+always @(posedge pcie1_user_clk) begin
+    pcie1_user_reset_reg_1 <= pcie1_user_reset_int;
+    pcie1_user_reset_reg_2 <= pcie1_user_reset_reg_1;
+end
+
+assign pcie1_user_reset = pcie1_user_reset_reg_2;
+
 pcie4_uscale_plus_1
 pcie4_uscale_plus_inst1 (
     .pci_exp_txn(pcie1_tx_n),
@@ -1716,7 +1744,7 @@ pcie4_uscale_plus_inst1 (
     .pci_exp_rxn(pcie1_rx_n),
     .pci_exp_rxp(pcie1_rx_p),
     .user_clk(pcie1_user_clk),
-    .user_reset(pcie1_user_reset),
+    .user_reset(pcie1_user_reset_int),
     .user_lnk_up(),
 
     .s_axis_rq_tdata(axis1_rq_tdata),
@@ -2773,6 +2801,20 @@ wire [3:0]  cfg2_interrupt_msi_function_number;
 wire status2_error_cor;
 wire status2_error_uncor;
 
+// extra register for pcie2_user_reset signal
+wire pcie2_user_reset_int;
+(* shreg_extract = "no" *)
+reg pcie2_user_reset_reg_1 = 1'b1;
+(* shreg_extract = "no" *)
+reg pcie2_user_reset_reg_2 = 1'b1;
+
+always @(posedge pcie2_user_clk) begin
+    pcie2_user_reset_reg_1 <= pcie2_user_reset_int;
+    pcie2_user_reset_reg_2 <= pcie2_user_reset_reg_1;
+end
+
+assign pcie2_user_reset = pcie2_user_reset_reg_2;
+
 pcie4_uscale_plus_2
 pcie4_uscale_plus_inst2 (
     .pci_exp_txn(pcie2_tx_n),
@@ -2780,7 +2822,7 @@ pcie4_uscale_plus_inst2 (
     .pci_exp_rxn(pcie2_rx_n),
     .pci_exp_rxp(pcie2_rx_p),
     .user_clk(pcie2_user_clk),
-    .user_reset(pcie2_user_reset),
+    .user_reset(pcie2_user_reset_int),
     .user_lnk_up(),
 
     .s_axis_rq_tdata(axis2_rq_tdata),

@@ -37,7 +37,7 @@ set_property -dict {LOC N37 IOSTANDARD LVCMOS18 SLEW SLOW DRIVE 8} [get_ports i2
 ############################### FPGA0 D0 ###############################
 
 # QSFP28-F port
-# Serdes ordered not swapped in FPGA, need to swap in software
+# Serdes ordered swapped in FPGA
 #   QSFP    MGT_TRX
 #   0       0
 #   1       2
@@ -47,19 +47,19 @@ set_property -dict {LOC BH4  } [get_ports qsfp0_1_rx1_p] ;# MGTYRXN0_221 GTYE4_C
 #set_property -dict {LOC Y1  } [get_ports qsfp0_1_rx1_n] ;# MGTYRXP0_221 GTYE4_CHANNEL_X1Y8 / GTYE4_COMMON_X1Y2
 set_property -dict {LOC BG11 } [get_ports qsfp0_1_tx1_p] ;# MGTYTXN0_221 GTYE4_CHANNEL_X1Y8 / GTYE4_COMMON_X1Y2
 #set_property -dict {LOC V6  } [get_ports qsfp0_1_tx1_n] ;# MGTYTXP0_221 GTYE4_CHANNEL_X1Y8 / GTYE4_COMMON_X1Y2
-set_property -dict {LOC BG2  } [get_ports qsfp0_1_rx2_p] ;# MGTYRXN1_221 GTYE4_CHANNEL_X1Y9 / GTYE4_COMMON_X1Y2
-#set_property -dict {LOC W3  } [get_ports qsfp0_1_rx2_n] ;# MGTYRXP1_221 GTYE4_CHANNEL_X1Y9 / GTYE4_COMMON_X1Y2
-set_property -dict {LOC BJ11 } [get_ports qsfp0_1_tx2_p] ;# MGTYTXN1_221 GTYE4_CHANNEL_X1Y9 / GTYE4_COMMON_X1Y2
-#set_property -dict {LOC T6  } [get_ports qsfp0_1_tx2_n] ;# MGTYTXP1_221 GTYE4_CHANNEL_X1Y9 / GTYE4_COMMON_X1Y2
-set_property -dict {LOC BG6  } [get_ports qsfp0_1_rx3_p] ;# MGTYRXN2_221 GTYE4_CHANNEL_X1Y10 / GTYE4_COMMON_X1Y2
-#set_property -dict {LOC V1  } [get_ports qsfp0_1_rx3_n] ;# MGTYRXP2_221 GTYE4_CHANNEL_X1Y10 / GTYE4_COMMON_X1Y2
-set_property -dict {LOC BH9  } [get_ports qsfp0_1_tx3_p] ;# MGTYTXN2_221 GTYE4_CHANNEL_X1Y10 / GTYE4_COMMON_X1Y2
-#set_property -dict {LOC P6  } [get_ports qsfp0_1_tx3_n] ;# MGTYTXP2_221 GTYE4_CHANNEL_X1Y10 / GTYE4_COMMON_X1Y2
+set_property -dict {LOC BG6  } [get_ports qsfp0_1_rx2_p] ;# MGTYRXN1_221 GTYE4_CHANNEL_X1Y10 / GTYE4_COMMON_X1Y2
+#set_property -dict {LOC W3  } [get_ports qsfp0_1_rx2_n] ;# MGTYRXP1_221 GTYE4_CHANNEL_X1Y10 / GTYE4_COMMON_X1Y2
+set_property -dict {LOC BH9  } [get_ports qsfp0_1_tx2_p] ;# MGTYTXN1_221 GTYE4_CHANNEL_X1Y10 / GTYE4_COMMON_X1Y2
+#set_property -dict {LOC T6  } [get_ports qsfp0_1_tx2_n] ;# MGTYTXP1_221 GTYE4_CHANNEL_X1Y10 / GTYE4_COMMON_X1Y2
+set_property -dict {LOC BG2  } [get_ports qsfp0_1_rx3_p] ;# MGTYRXN2_221 GTYE4_CHANNEL_X1Y9 / GTYE4_COMMON_X1Y2
+#set_property -dict {LOC V1  } [get_ports qsfp0_1_rx3_n] ;# MGTYRXP2_221 GTYE4_CHANNEL_X1Y9 / GTYE4_COMMON_X1Y2
+set_property -dict {LOC BJ11 } [get_ports qsfp0_1_tx3_p] ;# MGTYTXN2_221 GTYE4_CHANNEL_X1Y9 / GTYE4_COMMON_X1Y2
+#set_property -dict {LOC P6  } [get_ports qsfp0_1_tx3_n] ;# MGTYTXP2_221 GTYE4_CHANNEL_X1Y9 / GTYE4_COMMON_X1Y2
 set_property -dict {LOC BF4  } [get_ports qsfp0_1_rx4_p] ;# MGTYRXN3_221 GTYE4_CHANNEL_X1Y11 / GTYE4_COMMON_X1Y2
 #set_property -dict {LOC U3  } [get_ports qsfp0_1_rx4_n] ;# MGTYRXP3_221 GTYE4_CHANNEL_X1Y11 / GTYE4_COMMON_X1Y2
 set_property -dict {LOC BF9  } [get_ports qsfp0_1_tx4_p] ;# MGTYTXN3_221 GTYE4_CHANNEL_X1Y11 / GTYE4_COMMON_X1Y2
 #set_property -dict {LOC M6  } [get_ports qsfp0_1_tx4_n] ;# MGTYTXP3_221 GTYE4_CHANNEL_X1Y11 / GTYE4_COMMON_X1Y2
-set_property -dict {LOC AY13  } [get_ports qsfp0_1_mgt_refclk_0_p] ;# MGTREFCLK0P_221 
+set_property -dict {LOC AY13 } [get_ports qsfp0_1_mgt_refclk_0_p] ;# MGTREFCLK0P_221 
 #set_property -dict {LOC W8  } [get_ports qsfp0_1_mgt_refclk_0_n] ;# MGTREFCLK0N_221 
 
 # 161.1328125 MHz MGT reference clock
@@ -140,7 +140,7 @@ create_clock -period 10 -name pcie0_mgt_refclk_0 [get_ports pcie0_refclk_0_p]
 ############################### FPGA0 D1 ###############################
 
 # QSFP28-E port
-# Serdes ordered not swapped in FPGA, need to swap in software
+# Serdes ordered swapped in FPGA
 #   QSFP    MGT_TRX
 #   0       0
 #   1       2
@@ -150,13 +150,13 @@ set_property -dict {LOC AJ2  } [get_ports qsfp1_1_rx1_p] ;# MGTYRXN0_226 GTYE4_C
 #set_property -dict {LOC Y1  } [get_ports qsfp1_1_rx1_n] ;# MGTYRXP0_226 GTYE4_CHANNEL_X1Y28 / GTYE4_COMMON_X1Y7
 set_property -dict {LOC AJ7  } [get_ports qsfp1_1_tx1_p] ;# MGTYTXN0_226 GTYE4_CHANNEL_X1Y28 / GTYE4_COMMON_X1Y7
 #set_property -dict {LOC V6  } [get_ports qsfp1_1_tx1_n] ;# MGTYTXP0_226 GTYE4_CHANNEL_X1Y28 / GTYE4_COMMON_X1Y7
-set_property -dict {LOC AH4  } [get_ports qsfp1_1_rx2_p] ;# MGTYRXN2_226 GTYE4_CHANNEL_X1Y30 / GTYE4_COMMON_X1Y7
+set_property -dict {LOC AG2  } [get_ports qsfp1_1_rx2_p] ;# MGTYRXN2_226 GTYE4_CHANNEL_X1Y30 / GTYE4_COMMON_X1Y7
 #set_property -dict {LOC W3  } [get_ports qsfp1_1_rx2_n] ;# MGTYRXP2_226 GTYE4_CHANNEL_X1Y30 / GTYE4_COMMON_X1Y7
-set_property -dict {LOC AH9  } [get_ports qsfp1_1_tx2_p] ;# MGTYTXN2_226 GTYE4_CHANNEL_X1Y30 / GTYE4_COMMON_X1Y7
+set_property -dict {LOC AG7  } [get_ports qsfp1_1_tx2_p] ;# MGTYTXN2_226 GTYE4_CHANNEL_X1Y30 / GTYE4_COMMON_X1Y7
 #set_property -dict {LOC T6  } [get_ports qsfp1_1_tx2_n] ;# MGTYTXP2_226 GTYE4_CHANNEL_X1Y30 / GTYE4_COMMON_X1Y7
-set_property -dict {LOC AG2  } [get_ports qsfp1_1_rx3_p] ;# MGTYRXN1_226 GTYE4_CHANNEL_X1Y29 / GTYE4_COMMON_X1Y7
+set_property -dict {LOC AH4  } [get_ports qsfp1_1_rx3_p] ;# MGTYRXN1_226 GTYE4_CHANNEL_X1Y29 / GTYE4_COMMON_X1Y7
 #set_property -dict {LOC V1  } [get_ports qsfp1_1_rx3_n] ;# MGTYRXP1_226 GTYE4_CHANNEL_X1Y29 / GTYE4_COMMON_X1Y7
-set_property -dict {LOC AG7  } [get_ports qsfp1_1_tx3_p] ;# MGTYTXN1_226 GTYE4_CHANNEL_X1Y29 / GTYE4_COMMON_X1Y7
+set_property -dict {LOC AH9  } [get_ports qsfp1_1_tx3_p] ;# MGTYTXN1_226 GTYE4_CHANNEL_X1Y29 / GTYE4_COMMON_X1Y7
 #set_property -dict {LOC P6  } [get_ports qsfp1_1_tx3_n] ;# MGTYTXP1_226 GTYE4_CHANNEL_X1Y29 / GTYE4_COMMON_X1Y7
 set_property -dict {LOC AF4  } [get_ports qsfp1_1_rx4_p] ;# MGTYRXN3_226 GTYE4_CHANNEL_X1Y31 / GTYE4_COMMON_X1Y7
 #set_property -dict {LOC U3  } [get_ports qsfp1_1_rx4_n] ;# MGTYRXP3_226 GTYE4_CHANNEL_X1Y31 / GTYE4_COMMON_X1Y7
@@ -243,7 +243,7 @@ create_clock -period 10 -name pcie1_mgt_refclk_0 [get_ports pcie1_refclk_0_p]
 ############################### FPGA0 D2 ###############################
 
 # QSFP28-D port
-# Serdes ordered not swapped in FPGA, need to swap in software
+# Serdes ordered swapped in FPGA
 #   QSFP    MGT_TRX
 #   0       0
 #   1       2
@@ -253,14 +253,14 @@ set_property -dict {LOC N2  } [get_ports qsfp2_1_rx1_p] ;# MGTYRXN0_230 GTYE4_CH
 #set_property -dict {LOC Y1  } [get_ports qsfp2_1_rx1_n] ;# MGTYRXP0_230 GTYE4_CHANNEL_X1Y44 / GTYE4_COMMON_X1Y11
 set_property -dict {LOC N7  } [get_ports qsfp2_1_tx1_p] ;# MGTYTXN0_230 GTYE4_CHANNEL_X1Y44 / GTYE4_COMMON_X1Y11
 #set_property -dict {LOC V6  } [get_ports qsfp2_1_tx1_n] ;# MGTYTXP0_230 GTYE4_CHANNEL_X1Y44 / GTYE4_COMMON_X1Y11
-set_property -dict {LOC M4  } [get_ports qsfp2_1_rx2_p] ;# MGTYRXN2_230 GTYE4_CHANNEL_X1Y45 / GTYE4_COMMON_X1Y11
-#set_property -dict {LOC W3  } [get_ports qsfp2_1_rx2_n] ;# MGTYRXP2_230 GTYE4_CHANNEL_X1Y45 / GTYE4_COMMON_X1Y11
-set_property -dict {LOC M9  } [get_ports qsfp2_1_tx2_p] ;# MGTYTXN2_230 GTYE4_CHANNEL_X1Y45 / GTYE4_COMMON_X1Y11
-#set_property -dict {LOC T6  } [get_ports qsfp2_1_tx2_n] ;# MGTYTXP2_230 GTYE4_CHANNEL_X1Y45 / GTYE4_COMMON_X1Y11
-set_property -dict {LOC L2  } [get_ports qsfp2_1_rx3_p] ;# MGTYRXN1_230 GTYE4_CHANNEL_X1Y46 / GTYE4_COMMON_X1Y11
-#set_property -dict {LOC V1  } [get_ports qsfp2_1_rx3_n] ;# MGTYRXP1_230 GTYE4_CHANNEL_X1Y46 / GTYE4_COMMON_X1Y11
-set_property -dict {LOC L7  } [get_ports qsfp2_1_tx3_p] ;# MGTYTXN1_230 GTYE4_CHANNEL_X1Y46 / GTYE4_COMMON_X1Y11
-#set_property -dict {LOC P6  } [get_ports qsfp2_1_tx3_n] ;# MGTYTXP1_230 GTYE4_CHANNEL_X1Y46 / GTYE4_COMMON_X1Y11
+set_property -dict {LOC L2  } [get_ports qsfp2_1_rx2_p] ;# MGTYRXN2_230 GTYE4_CHANNEL_X1Y46 / GTYE4_COMMON_X1Y11
+#set_property -dict {LOC W3  } [get_ports qsfp2_1_rx2_n] ;# MGTYRXP2_230 GTYE4_CHANNEL_X1Y46 / GTYE4_COMMON_X1Y11
+set_property -dict {LOC L7  } [get_ports qsfp2_1_tx2_p] ;# MGTYTXN2_230 GTYE4_CHANNEL_X1Y46 / GTYE4_COMMON_X1Y11
+#set_property -dict {LOC T6  } [get_ports qsfp2_1_tx2_n] ;# MGTYTXP2_230 GTYE4_CHANNEL_X1Y46 / GTYE4_COMMON_X1Y11
+set_property -dict {LOC M4  } [get_ports qsfp2_1_rx3_p] ;# MGTYRXN1_230 GTYE4_CHANNEL_X1Y45 / GTYE4_COMMON_X1Y11
+#set_property -dict {LOC V1  } [get_ports qsfp2_1_rx3_n] ;# MGTYRXP1_230 GTYE4_CHANNEL_X1Y45 / GTYE4_COMMON_X1Y11
+set_property -dict {LOC M9  } [get_ports qsfp2_1_tx3_p] ;# MGTYTXN1_230 GTYE4_CHANNEL_X1Y45 / GTYE4_COMMON_X1Y11
+#set_property -dict {LOC P6  } [get_ports qsfp2_1_tx3_n] ;# MGTYTXP1_230 GTYE4_CHANNEL_X1Y45 / GTYE4_COMMON_X1Y11
 set_property -dict {LOC K4  } [get_ports qsfp2_1_rx4_p] ;# MGTYRXN3_230 GTYE4_CHANNEL_X1Y47 / GTYE4_COMMON_X1Y11
 #set_property -dict {LOC U3  } [get_ports qsfp2_1_rx4_n] ;# MGTYRXP3_230 GTYE4_CHANNEL_X1Y47 / GTYE4_COMMON_X1Y11
 set_property -dict {LOC K9  } [get_ports qsfp2_1_tx4_p] ;# MGTYTXN3_230 GTYE4_CHANNEL_X1Y47 / GTYE4_COMMON_X1Y11
@@ -272,29 +272,29 @@ set_property -dict {LOC U11  } [get_ports qsfp2_1_mgt_refclk_0_p] ;# MGTREFCLK0P
 create_clock -period 6.206 -name qsfp2_1_mgt_refclk_0 [get_ports qsfp2_1_mgt_refclk_0_p]
 
 # Interconnection-F port
-# Serdes order not swapped in FPGA
+# Serdes ordered swapped in FPGA
 # Only I-F CH0 & CH1 are available.
 #   CH      MGT_TRX
 #   0       2
 #   1       3
 #   NA      0
 #   NA      1
-set_property -dict {LOC J2  } [get_ports qsfp2_2_rx1_p] ;# MGTYRXN2_231 GTYE4_CHANNEL_X1Y48 / GTYE4_COMMON_X1Y12
-#set_property -dict {LOC T1  } [get_ports qsfp2_2_rx1_n] ;# MGTYRXP2_231 GTYE4_CHANNEL_X1Y48 / GTYE4_COMMON_X1Y12
-set_property -dict {LOC J7  } [get_ports qsfp2_2_tx1_p] ;# MGTYTXN2_231 GTYE4_CHANNEL_X1Y48 / GTYE4_COMMON_X1Y12
-#set_property -dict {LOC L4  } [get_ports qsfp2_2_tx1_n] ;# MGTYTXP2_231 GTYE4_CHANNEL_X1Y48 / GTYE4_COMMON_X1Y12
-set_property -dict {LOC H4  } [get_ports qsfp2_2_rx2_p] ;# MGTYRXN3_231 GTYE4_CHANNEL_X1Y49 / GTYE4_COMMON_X1Y12
-#set_property -dict {LOC R3  } [get_ports qsfp2_2_rx2_n] ;# MGTYRXP3_231 GTYE4_CHANNEL_X1Y49 / GTYE4_COMMON_X1Y12
-set_property -dict {LOC H9  } [get_ports qsfp2_2_tx2_p] ;# MGTYTXN3_231 GTYE4_CHANNEL_X1Y49 / GTYE4_COMMON_X1Y12
-#set_property -dict {LOC K6  } [get_ports qsfp2_2_tx2_n] ;# MGTYTXP3_231 GTYE4_CHANNEL_X1Y49 / GTYE4_COMMON_X1Y12
-set_property -dict {LOC G2  } [get_ports qsfp2_2_rx3_p] ;# MGTYRXN0_231 GTYE4_CHANNEL_X1Y50 / GTYE4_COMMON_X1Y12
-#set_property -dict {LOC P1  } [get_ports qsfp2_2_rx3_n] ;# MGTYRXP0_231 GTYE4_CHANNEL_X1Y50 / GTYE4_COMMON_X1Y12
-set_property -dict {LOC G7  } [get_ports qsfp2_2_tx3_p] ;# MGTYTXN0_231 GTYE4_CHANNEL_X1Y50 / GTYE4_COMMON_X1Y12
-#set_property -dict {LOC J4  } [get_ports qsfp2_2_tx3_n] ;# MGTYTXP0_231 GTYE4_CHANNEL_X1Y50 / GTYE4_COMMON_X1Y12
-set_property -dict {LOC F4  } [get_ports qsfp2_2_rx4_p] ;# MGTYRXN1_231 GTYE4_CHANNEL_X1Y51 / GTYE4_COMMON_X1Y12
-#set_property -dict {LOC M1  } [get_ports qsfp2_2_rx4_n] ;# MGTYRXP1_231 GTYE4_CHANNEL_X1Y51 / GTYE4_COMMON_X1Y12
-set_property -dict {LOC F9  } [get_ports qsfp2_2_tx4_p] ;# MGTYTXN1_231 GTYE4_CHANNEL_X1Y51 / GTYE4_COMMON_X1Y12
-#set_property -dict {LOC H6  } [get_ports qsfp2_2_tx4_n] ;# MGTYTXP1_231 GTYE4_CHANNEL_X1Y51 / GTYE4_COMMON_X1Y12
+set_property -dict {LOC G2  } [get_ports qsfp2_2_rx1_p] ;# MGTYRXN2_231 GTYE4_CHANNEL_X1Y50 / GTYE4_COMMON_X1Y12
+#set_property -dict {LOC T1  } [get_ports qsfp2_2_rx1_n] ;# MGTYRXP2_231 GTYE4_CHANNEL_X1Y50 / GTYE4_COMMON_X1Y12
+set_property -dict {LOC G7  } [get_ports qsfp2_2_tx1_p] ;# MGTYTXN2_231 GTYE4_CHANNEL_X1Y50 / GTYE4_COMMON_X1Y12
+#set_property -dict {LOC L4  } [get_ports qsfp2_2_tx1_n] ;# MGTYTXP2_231 GTYE4_CHANNEL_X1Y50 / GTYE4_COMMON_X1Y12
+set_property -dict {LOC F4  } [get_ports qsfp2_2_rx2_p] ;# MGTYRXN3_231 GTYE4_CHANNEL_X1Y51 / GTYE4_COMMON_X1Y12
+#set_property -dict {LOC R3  } [get_ports qsfp2_2_rx2_n] ;# MGTYRXP3_231 GTYE4_CHANNEL_X1Y51 / GTYE4_COMMON_X1Y12
+set_property -dict {LOC F9  } [get_ports qsfp2_2_tx2_p] ;# MGTYTXN3_231 GTYE4_CHANNEL_X1Y51 / GTYE4_COMMON_X1Y12
+#set_property -dict {LOC K6  } [get_ports qsfp2_2_tx2_n] ;# MGTYTXP3_231 GTYE4_CHANNEL_X1Y51 / GTYE4_COMMON_X1Y12
+set_property -dict {LOC J2  } [get_ports qsfp2_2_rx3_p] ;# MGTYRXN0_231 GTYE4_CHANNEL_X1Y48 / GTYE4_COMMON_X1Y12
+#set_property -dict {LOC P1  } [get_ports qsfp2_2_rx3_n] ;# MGTYRXP0_231 GTYE4_CHANNEL_X1Y48 / GTYE4_COMMON_X1Y12
+set_property -dict {LOC J7  } [get_ports qsfp2_2_tx3_p] ;# MGTYTXN0_231 GTYE4_CHANNEL_X1Y48 / GTYE4_COMMON_X1Y12
+#set_property -dict {LOC J4  } [get_ports qsfp2_2_tx3_n] ;# MGTYTXP0_231 GTYE4_CHANNEL_X1Y48 / GTYE4_COMMON_X1Y12
+set_property -dict {LOC H4  } [get_ports qsfp2_2_rx4_p] ;# MGTYRXN1_231 GTYE4_CHANNEL_X1Y49 / GTYE4_COMMON_X1Y12
+#set_property -dict {LOC M1  } [get_ports qsfp2_2_rx4_n] ;# MGTYRXP1_231 GTYE4_CHANNEL_X1Y49 / GTYE4_COMMON_X1Y12
+set_property -dict {LOC H9  } [get_ports qsfp2_2_tx4_p] ;# MGTYTXN1_231 GTYE4_CHANNEL_X1Y49 / GTYE4_COMMON_X1Y12
+#set_property -dict {LOC H6  } [get_ports qsfp2_2_tx4_n] ;# MGTYTXP1_231 GTYE4_CHANNEL_X1Y49 / GTYE4_COMMON_X1Y12
 set_property -dict {LOC R11  } [get_ports qsfp2_2_mgt_refclk_0_p] ;# MGTREFCLK0P_231
 #set_property -dict {LOC R8  } [get_ports qsfp2_2_mgt_refclk_0_n] ;# MGTREFCLK0N_231
 

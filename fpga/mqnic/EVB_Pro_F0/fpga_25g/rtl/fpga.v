@@ -1144,14 +1144,14 @@ qsfp_gty_inst0 (
     .qpll0outclk_out(),
     .qpll0outrefclk_out(),
 
-    .gtyrxn_in({qsfp0_2_rx4_n, qsfp0_2_rx3_n, qsfp0_2_rx2_n, qsfp0_2_rx1_n, qsfp0_1_rx4_n, qsfp0_1_rx3_n, qsfp0_1_rx2_n, qsfp0_1_rx1_n}),
-    .gtyrxp_in({qsfp0_2_rx4_p, qsfp0_2_rx3_p, qsfp0_2_rx2_p, qsfp0_2_rx1_p, qsfp0_1_rx4_p, qsfp0_1_rx3_p, qsfp0_1_rx2_p, qsfp0_1_rx1_p}),
+    .gtyrxn_in({qsfp0_2_rx4_n, qsfp0_2_rx3_n, qsfp0_2_rx2_n, qsfp0_2_rx1_n, qsfp0_1_rx4_n, qsfp0_1_rx2_n, qsfp0_1_rx3_n, qsfp0_1_rx1_n}),
+    .gtyrxp_in({qsfp0_2_rx4_p, qsfp0_2_rx3_p, qsfp0_2_rx2_p, qsfp0_2_rx1_p, qsfp0_1_rx4_p, qsfp0_1_rx2_p, qsfp0_1_rx3_p, qsfp0_1_rx1_p}),
 
-    .rxusrclk_in(gt0_rxusrclk),
-    .rxusrclk2_in(gt0_rxusrclk),
+    .rxusrclk_in({gt0_rxusrclk[7:3], gt0_rxusrclk[1], gt0_rxusrclk[2], gt0_rxusrclk[0]}),
+    .rxusrclk2_in({gt0_rxusrclk[7:3], gt0_rxusrclk[1], gt0_rxusrclk[2], gt0_rxusrclk[0]}),
 
-    .gtwiz_userdata_tx_in({qsfp0_2_gt_txdata_4, qsfp0_2_gt_txdata_3, qsfp0_2_gt_txdata_2, qsfp0_2_gt_txdata_1, qsfp0_1_gt_txdata_4, qsfp0_1_gt_txdata_3, qsfp0_1_gt_txdata_2, qsfp0_1_gt_txdata_1}),
-    .txheader_in({qsfp0_2_gt_txheader_4, qsfp0_2_gt_txheader_3, qsfp0_2_gt_txheader_2, qsfp0_2_gt_txheader_1, qsfp0_1_gt_txheader_4, qsfp0_1_gt_txheader_3, qsfp0_1_gt_txheader_2, qsfp0_1_gt_txheader_1}),
+    .gtwiz_userdata_tx_in({qsfp0_2_gt_txdata_4, qsfp0_2_gt_txdata_3, qsfp0_2_gt_txdata_2, qsfp0_2_gt_txdata_1, qsfp0_1_gt_txdata_4, qsfp0_1_gt_txdata_2, qsfp0_1_gt_txdata_3, qsfp0_1_gt_txdata_1}),
+    .txheader_in({qsfp0_2_gt_txheader_4, qsfp0_2_gt_txheader_3, qsfp0_2_gt_txheader_2, qsfp0_2_gt_txheader_1, qsfp0_1_gt_txheader_4, qsfp0_1_gt_txheader_2, qsfp0_1_gt_txheader_3, qsfp0_1_gt_txheader_1}),
     .txsequence_in({8{1'b0}}),
 
     .txusrclk_in({8{gt0_txusrclk}}),
@@ -1159,15 +1159,15 @@ qsfp_gty_inst0 (
 
     .gtpowergood_out(),
 
-    .gtytxn_out({qsfp0_2_tx4_n, qsfp0_2_tx3_n, qsfp0_2_tx2_n, qsfp0_2_tx1_n, qsfp0_1_tx4_n, qsfp0_1_tx3_n, qsfp0_1_tx2_n, qsfp0_1_tx1_n}),
-    .gtytxp_out({qsfp0_2_tx4_p, qsfp0_2_tx3_p, qsfp0_2_tx2_p, qsfp0_2_tx1_p, qsfp0_1_tx4_p, qsfp0_1_tx3_p, qsfp0_1_tx2_p, qsfp0_1_tx1_p}),
+    .gtytxn_out({qsfp0_2_tx4_n, qsfp0_2_tx3_n, qsfp0_2_tx2_n, qsfp0_2_tx1_n, qsfp0_1_tx4_n, qsfp0_1_tx2_n, qsfp0_1_tx3_n, qsfp0_1_tx1_n}),
+    .gtytxp_out({qsfp0_2_tx4_p, qsfp0_2_tx3_p, qsfp0_2_tx2_p, qsfp0_2_tx1_p, qsfp0_1_tx4_p, qsfp0_1_tx2_p, qsfp0_1_tx3_p, qsfp0_1_tx1_p}),
 
-    .rxgearboxslip_in({qsfp0_2_gt_rxgearboxslip_4, qsfp0_2_gt_rxgearboxslip_3, qsfp0_2_gt_rxgearboxslip_2, qsfp0_2_gt_rxgearboxslip_1, qsfp0_1_gt_rxgearboxslip_4, qsfp0_1_gt_rxgearboxslip_3, qsfp0_1_gt_rxgearboxslip_2, qsfp0_1_gt_rxgearboxslip_1}),
-    .gtwiz_userdata_rx_out({qsfp0_2_gt_rxdata_4, qsfp0_2_gt_rxdata_3, qsfp0_2_gt_rxdata_2, qsfp0_2_gt_rxdata_1, qsfp0_1_gt_rxdata_4, qsfp0_1_gt_rxdata_3, qsfp0_1_gt_rxdata_2, qsfp0_1_gt_rxdata_1}),
-    .rxdatavalid_out({qsfp0_2_gt_rxdatavalid_4, qsfp0_2_gt_rxdatavalid_3, qsfp0_2_gt_rxdatavalid_2, qsfp0_2_gt_rxdatavalid_1, qsfp0_1_gt_rxdatavalid_4, qsfp0_1_gt_rxdatavalid_3, qsfp0_1_gt_rxdatavalid_2, qsfp0_1_gt_rxdatavalid_1}),
-    .rxheader_out({qsfp0_2_gt_rxheader_4, qsfp0_2_gt_rxheader_3, qsfp0_2_gt_rxheader_2, qsfp0_2_gt_rxheader_1, qsfp0_1_gt_rxheader_4, qsfp0_1_gt_rxheader_3, qsfp0_1_gt_rxheader_2, qsfp0_1_gt_rxheader_1}),
-    .rxheadervalid_out({qsfp0_2_gt_rxheadervalid_4, qsfp0_2_gt_rxheadervalid_3, qsfp0_2_gt_rxheadervalid_2, qsfp0_2_gt_rxheadervalid_1, qsfp0_1_gt_rxheadervalid_4, qsfp0_1_gt_rxheadervalid_3, qsfp0_1_gt_rxheadervalid_2, qsfp0_1_gt_rxheadervalid_1}),
-    .rxoutclk_out(gt0_rxclkout),
+    .rxgearboxslip_in({qsfp0_2_gt_rxgearboxslip_4, qsfp0_2_gt_rxgearboxslip_3, qsfp0_2_gt_rxgearboxslip_2, qsfp0_2_gt_rxgearboxslip_1, qsfp0_1_gt_rxgearboxslip_4, qsfp0_1_gt_rxgearboxslip_2, qsfp0_1_gt_rxgearboxslip_3, qsfp0_1_gt_rxgearboxslip_1}),
+    .gtwiz_userdata_rx_out({qsfp0_2_gt_rxdata_4, qsfp0_2_gt_rxdata_3, qsfp0_2_gt_rxdata_2, qsfp0_2_gt_rxdata_1, qsfp0_1_gt_rxdata_4, qsfp0_1_gt_rxdata_2, qsfp0_1_gt_rxdata_3, qsfp0_1_gt_rxdata_1}),
+    .rxdatavalid_out({qsfp0_2_gt_rxdatavalid_4, qsfp0_2_gt_rxdatavalid_3, qsfp0_2_gt_rxdatavalid_2, qsfp0_2_gt_rxdatavalid_1, qsfp0_1_gt_rxdatavalid_4, qsfp0_1_gt_rxdatavalid_2, qsfp0_1_gt_rxdatavalid_3, qsfp0_1_gt_rxdatavalid_1}),
+    .rxheader_out({qsfp0_2_gt_rxheader_4, qsfp0_2_gt_rxheader_3, qsfp0_2_gt_rxheader_2, qsfp0_2_gt_rxheader_1, qsfp0_1_gt_rxheader_4, qsfp0_1_gt_rxheader_2, qsfp0_1_gt_rxheader_3, qsfp0_1_gt_rxheader_1}),
+    .rxheadervalid_out({qsfp0_2_gt_rxheadervalid_4, qsfp0_2_gt_rxheadervalid_3, qsfp0_2_gt_rxheadervalid_2, qsfp0_2_gt_rxheadervalid_1, qsfp0_1_gt_rxheadervalid_4, qsfp0_1_gt_rxheadervalid_2, qsfp0_1_gt_rxheadervalid_3, qsfp0_1_gt_rxheadervalid_1}),
+    .rxoutclk_out({gt0_rxclkout[7:3], gt0_rxclkout[1], gt0_rxclkout[2], gt0_rxclkout[0]}),
     .rxpmaresetdone_out(gt0_rxpmaresetdone),
     .rxprgdivresetdone_out(gt0_rxprgdivresetdone),
     .rxstartofseq_out(),
@@ -2277,14 +2277,14 @@ qsfp_gty_inst1 (
     .qpll0outclk_out(),
     .qpll0outrefclk_out(),
 
-    .gtyrxn_in({qsfp1_2_rx4_n, qsfp1_2_rx3_n, qsfp1_2_rx2_n, qsfp1_2_rx1_n, qsfp1_1_rx4_n, qsfp1_1_rx3_n, qsfp1_1_rx2_n, qsfp1_1_rx1_n}),
-    .gtyrxp_in({qsfp1_2_rx4_p, qsfp1_2_rx3_p, qsfp1_2_rx2_p, qsfp1_2_rx1_p, qsfp1_1_rx4_p, qsfp1_1_rx3_p, qsfp1_1_rx2_p, qsfp1_1_rx1_p}),
+    .gtyrxn_in({qsfp1_2_rx4_n, qsfp1_2_rx3_n, qsfp1_2_rx2_n, qsfp1_2_rx1_n, qsfp1_1_rx4_n, qsfp1_1_rx2_n, qsfp1_1_rx3_n, qsfp1_1_rx1_n}),
+    .gtyrxp_in({qsfp1_2_rx4_p, qsfp1_2_rx3_p, qsfp1_2_rx2_p, qsfp1_2_rx1_p, qsfp1_1_rx4_p, qsfp1_1_rx2_p, qsfp1_1_rx3_p, qsfp1_1_rx1_p}),
 
-    .rxusrclk_in(gt1_rxusrclk),
-    .rxusrclk2_in(gt1_rxusrclk),
+    .rxusrclk_in({gt1_rxusrclk[7:3], gt1_rxusrclk[1], gt1_rxusrclk[2], gt1_rxusrclk[0]}),
+    .rxusrclk2_in({gt1_rxusrclk[7:3], gt1_rxusrclk[1], gt1_rxusrclk[2], gt1_rxusrclk[0]}),
 
-    .gtwiz_userdata_tx_in({qsfp1_2_gt_txdata_4, qsfp1_2_gt_txdata_3, qsfp1_2_gt_txdata_2, qsfp1_2_gt_txdata_1, qsfp1_1_gt_txdata_4, qsfp1_1_gt_txdata_3, qsfp1_1_gt_txdata_2, qsfp1_1_gt_txdata_1}),
-    .txheader_in({qsfp1_2_gt_txheader_4, qsfp1_2_gt_txheader_3, qsfp1_2_gt_txheader_2, qsfp1_2_gt_txheader_1, qsfp1_1_gt_txheader_4, qsfp1_1_gt_txheader_3, qsfp1_1_gt_txheader_2, qsfp1_1_gt_txheader_1}),
+    .gtwiz_userdata_tx_in({qsfp1_2_gt_txdata_4, qsfp1_2_gt_txdata_3, qsfp1_2_gt_txdata_2, qsfp1_2_gt_txdata_1, qsfp1_1_gt_txdata_4, qsfp1_1_gt_txdata_2, qsfp1_1_gt_txdata_3, qsfp1_1_gt_txdata_1}),
+    .txheader_in({qsfp1_2_gt_txheader_4, qsfp1_2_gt_txheader_3, qsfp1_2_gt_txheader_2, qsfp1_2_gt_txheader_1, qsfp1_1_gt_txheader_4, qsfp1_1_gt_txheader_2, qsfp1_1_gt_txheader_3, qsfp1_1_gt_txheader_1}),
     .txsequence_in({8{1'b0}}),
 
     .txusrclk_in({8{gt1_txusrclk}}),
@@ -2292,15 +2292,15 @@ qsfp_gty_inst1 (
 
     .gtpowergood_out(),
 
-    .gtytxn_out({qsfp1_2_tx4_n, qsfp1_2_tx3_n, qsfp1_2_tx2_n, qsfp1_2_tx1_n, qsfp1_1_tx4_n, qsfp1_1_tx3_n, qsfp1_1_tx2_n, qsfp1_1_tx1_n}),
-    .gtytxp_out({qsfp1_2_tx4_p, qsfp1_2_tx3_p, qsfp1_2_tx2_p, qsfp1_2_tx1_p, qsfp1_1_tx4_p, qsfp1_1_tx3_p, qsfp1_1_tx2_p, qsfp1_1_tx1_p}),
+    .gtytxn_out({qsfp1_2_tx4_n, qsfp1_2_tx3_n, qsfp1_2_tx2_n, qsfp1_2_tx1_n, qsfp1_1_tx4_n, qsfp1_1_tx2_n, qsfp1_1_tx3_n, qsfp1_1_tx1_n}),
+    .gtytxp_out({qsfp1_2_tx4_p, qsfp1_2_tx3_p, qsfp1_2_tx2_p, qsfp1_2_tx1_p, qsfp1_1_tx4_p, qsfp1_1_tx2_p, qsfp1_1_tx3_p, qsfp1_1_tx1_p}),
 
-    .rxgearboxslip_in({qsfp1_2_gt_rxgearboxslip_4, qsfp1_2_gt_rxgearboxslip_3, qsfp1_2_gt_rxgearboxslip_2, qsfp1_2_gt_rxgearboxslip_1, qsfp1_1_gt_rxgearboxslip_4, qsfp1_1_gt_rxgearboxslip_3, qsfp1_1_gt_rxgearboxslip_2, qsfp1_1_gt_rxgearboxslip_1}),
-    .gtwiz_userdata_rx_out({qsfp1_2_gt_rxdata_4, qsfp1_2_gt_rxdata_3, qsfp1_2_gt_rxdata_2, qsfp1_2_gt_rxdata_1, qsfp1_1_gt_rxdata_4, qsfp1_1_gt_rxdata_3, qsfp1_1_gt_rxdata_2, qsfp1_1_gt_rxdata_1}),
-    .rxdatavalid_out({qsfp1_2_gt_rxdatavalid_4, qsfp1_2_gt_rxdatavalid_3, qsfp1_2_gt_rxdatavalid_2, qsfp1_2_gt_rxdatavalid_1, qsfp1_1_gt_rxdatavalid_4, qsfp1_1_gt_rxdatavalid_3, qsfp1_1_gt_rxdatavalid_2, qsfp1_1_gt_rxdatavalid_1}),
-    .rxheader_out({qsfp1_2_gt_rxheader_4, qsfp1_2_gt_rxheader_3, qsfp1_2_gt_rxheader_2, qsfp1_2_gt_rxheader_1, qsfp1_1_gt_rxheader_4, qsfp1_1_gt_rxheader_3, qsfp1_1_gt_rxheader_2, qsfp1_1_gt_rxheader_1}),
-    .rxheadervalid_out({qsfp1_2_gt_rxheadervalid_4, qsfp1_2_gt_rxheadervalid_3, qsfp1_2_gt_rxheadervalid_2, qsfp1_2_gt_rxheadervalid_1, qsfp1_1_gt_rxheadervalid_4, qsfp1_1_gt_rxheadervalid_3, qsfp1_1_gt_rxheadervalid_2, qsfp1_1_gt_rxheadervalid_1}),
-    .rxoutclk_out(gt1_rxclkout),
+    .rxgearboxslip_in({qsfp1_2_gt_rxgearboxslip_4, qsfp1_2_gt_rxgearboxslip_3, qsfp1_2_gt_rxgearboxslip_2, qsfp1_2_gt_rxgearboxslip_1, qsfp1_1_gt_rxgearboxslip_4, qsfp1_1_gt_rxgearboxslip_2, qsfp1_1_gt_rxgearboxslip_3, qsfp1_1_gt_rxgearboxslip_1}),
+    .gtwiz_userdata_rx_out({qsfp1_2_gt_rxdata_4, qsfp1_2_gt_rxdata_3, qsfp1_2_gt_rxdata_2, qsfp1_2_gt_rxdata_1, qsfp1_1_gt_rxdata_4, qsfp1_1_gt_rxdata_2, qsfp1_1_gt_rxdata_3, qsfp1_1_gt_rxdata_1}),
+    .rxdatavalid_out({qsfp1_2_gt_rxdatavalid_4, qsfp1_2_gt_rxdatavalid_3, qsfp1_2_gt_rxdatavalid_2, qsfp1_2_gt_rxdatavalid_1, qsfp1_1_gt_rxdatavalid_4, qsfp1_1_gt_rxdatavalid_2, qsfp1_1_gt_rxdatavalid_3, qsfp1_1_gt_rxdatavalid_1}),
+    .rxheader_out({qsfp1_2_gt_rxheader_4, qsfp1_2_gt_rxheader_3, qsfp1_2_gt_rxheader_2, qsfp1_2_gt_rxheader_1, qsfp1_1_gt_rxheader_4, qsfp1_1_gt_rxheader_2, qsfp1_1_gt_rxheader_3, qsfp1_1_gt_rxheader_1}),
+    .rxheadervalid_out({qsfp1_2_gt_rxheadervalid_4, qsfp1_2_gt_rxheadervalid_3, qsfp1_2_gt_rxheadervalid_2, qsfp1_2_gt_rxheadervalid_1, qsfp1_1_gt_rxheadervalid_4, qsfp1_1_gt_rxheadervalid_2, qsfp1_1_gt_rxheadervalid_3, qsfp1_1_gt_rxheadervalid_1}),
+    .rxoutclk_out({gt1_rxclkout[7:3], gt1_rxclkout[1], gt1_rxclkout[2], gt1_rxclkout[0]}),
     .rxpmaresetdone_out(gt1_rxpmaresetdone),
     .rxprgdivresetdone_out(gt1_rxprgdivresetdone),
     .rxstartofseq_out(),
@@ -3410,14 +3410,14 @@ qsfp_gty_inst2 (
     .qpll0outclk_out(),
     .qpll0outrefclk_out(),
 
-    .gtyrxn_in({qsfp2_2_rx4_n, qsfp2_2_rx3_n, qsfp2_2_rx2_n, qsfp2_2_rx1_n, qsfp2_1_rx4_n, qsfp2_1_rx3_n, qsfp2_1_rx2_n, qsfp2_1_rx1_n}),
-    .gtyrxp_in({qsfp2_2_rx4_p, qsfp2_2_rx3_p, qsfp2_2_rx2_p, qsfp2_2_rx1_p, qsfp2_1_rx4_p, qsfp2_1_rx3_p, qsfp2_1_rx2_p, qsfp2_1_rx1_p}),
+    .gtyrxn_in({qsfp2_2_rx2_n, qsfp2_2_rx1_n, qsfp2_2_rx4_n, qsfp2_2_rx3_n, qsfp2_1_rx4_n, qsfp2_1_rx2_n, qsfp2_1_rx3_n, qsfp2_1_rx1_n}),
+    .gtyrxp_in({qsfp2_2_rx2_p, qsfp2_2_rx1_p, qsfp2_2_rx4_p, qsfp2_2_rx3_p, qsfp2_1_rx4_p, qsfp2_1_rx2_p, qsfp2_1_rx3_p, qsfp2_1_rx1_p}),
 
-    .rxusrclk_in(gt2_rxusrclk),
-    .rxusrclk2_in(gt2_rxusrclk),
+    .rxusrclk_in({gt2_rxusrclk[5:4], gt2_rxusrclk[7:6], gt2_rxusrclk[3], gt2_rxusrclk[1], gt2_rxusrclk[2], gt2_rxusrclk[0]}),
+    .rxusrclk2_in({gt2_rxusrclk[5:4], gt2_rxusrclk[7:6], gt2_rxusrclk[3], gt2_rxusrclk[1], gt2_rxusrclk[2], gt2_rxusrclk[0]}),
 
-    .gtwiz_userdata_tx_in({qsfp2_2_gt_txdata_4, qsfp2_2_gt_txdata_3, qsfp2_2_gt_txdata_2, qsfp2_2_gt_txdata_1, qsfp2_1_gt_txdata_4, qsfp2_1_gt_txdata_3, qsfp2_1_gt_txdata_2, qsfp2_1_gt_txdata_1}),
-    .txheader_in({qsfp2_2_gt_txheader_4, qsfp2_2_gt_txheader_3, qsfp2_2_gt_txheader_2, qsfp2_2_gt_txheader_1, qsfp2_1_gt_txheader_4, qsfp2_1_gt_txheader_3, qsfp2_1_gt_txheader_2, qsfp2_1_gt_txheader_1}),
+    .gtwiz_userdata_tx_in({qsfp2_2_gt_txdata_2, qsfp2_2_gt_txdata_1, qsfp2_2_gt_txdata_4, qsfp2_2_gt_txdata_3, qsfp2_1_gt_txdata_4, qsfp2_1_gt_txdata_2, qsfp2_1_gt_txdata_3, qsfp2_1_gt_txdata_1}),
+    .txheader_in({qsfp2_2_gt_txheader_2, qsfp2_2_gt_txheader_1, qsfp2_2_gt_txheader_4, qsfp2_2_gt_txheader_3, qsfp2_1_gt_txheader_4, qsfp2_1_gt_txheader_2, qsfp2_1_gt_txheader_3, qsfp2_1_gt_txheader_1}),
     .txsequence_in({8{1'b0}}),
 
     .txusrclk_in({8{gt2_txusrclk}}),
@@ -3425,15 +3425,15 @@ qsfp_gty_inst2 (
 
     .gtpowergood_out(),
 
-    .gtytxn_out({qsfp2_2_tx4_n, qsfp2_2_tx3_n, qsfp2_2_tx2_n, qsfp2_2_tx1_n, qsfp2_1_tx4_n, qsfp2_1_tx3_n, qsfp2_1_tx2_n, qsfp2_1_tx1_n}),
-    .gtytxp_out({qsfp2_2_tx4_p, qsfp2_2_tx3_p, qsfp2_2_tx2_p, qsfp2_2_tx1_p, qsfp2_1_tx4_p, qsfp2_1_tx3_p, qsfp2_1_tx2_p, qsfp2_1_tx1_p}),
+    .gtytxn_out({qsfp2_2_tx2_n, qsfp2_2_tx1_n, qsfp2_2_tx4_n, qsfp2_2_tx3_n, qsfp2_1_tx4_n, qsfp2_1_tx2_n, qsfp2_1_tx3_n, qsfp2_1_tx1_n}),
+    .gtytxp_out({qsfp2_2_tx2_p, qsfp2_2_tx1_p, qsfp2_2_tx4_p, qsfp2_2_tx3_p, qsfp2_1_tx4_p, qsfp2_1_tx2_p, qsfp2_1_tx3_p, qsfp2_1_tx1_p}),
 
-    .rxgearboxslip_in({qsfp2_2_gt_rxgearboxslip_4, qsfp2_2_gt_rxgearboxslip_3, qsfp2_2_gt_rxgearboxslip_2, qsfp2_2_gt_rxgearboxslip_1, qsfp2_1_gt_rxgearboxslip_4, qsfp2_1_gt_rxgearboxslip_3, qsfp2_1_gt_rxgearboxslip_2, qsfp2_1_gt_rxgearboxslip_1}),
-    .gtwiz_userdata_rx_out({qsfp2_2_gt_rxdata_4, qsfp2_2_gt_rxdata_3, qsfp2_2_gt_rxdata_2, qsfp2_2_gt_rxdata_1, qsfp2_1_gt_rxdata_4, qsfp2_1_gt_rxdata_3, qsfp2_1_gt_rxdata_2, qsfp2_1_gt_rxdata_1}),
-    .rxdatavalid_out({qsfp2_2_gt_rxdatavalid_4, qsfp2_2_gt_rxdatavalid_3, qsfp2_2_gt_rxdatavalid_2, qsfp2_2_gt_rxdatavalid_1, qsfp2_1_gt_rxdatavalid_4, qsfp2_1_gt_rxdatavalid_3, qsfp2_1_gt_rxdatavalid_2, qsfp2_1_gt_rxdatavalid_1}),
-    .rxheader_out({qsfp2_2_gt_rxheader_4, qsfp2_2_gt_rxheader_3, qsfp2_2_gt_rxheader_2, qsfp2_2_gt_rxheader_1, qsfp2_1_gt_rxheader_4, qsfp2_1_gt_rxheader_3, qsfp2_1_gt_rxheader_2, qsfp2_1_gt_rxheader_1}),
-    .rxheadervalid_out({qsfp2_2_gt_rxheadervalid_4, qsfp2_2_gt_rxheadervalid_3, qsfp2_2_gt_rxheadervalid_2, qsfp2_2_gt_rxheadervalid_1, qsfp2_1_gt_rxheadervalid_4, qsfp2_1_gt_rxheadervalid_3, qsfp2_1_gt_rxheadervalid_2, qsfp2_1_gt_rxheadervalid_1}),
-    .rxoutclk_out(gt2_rxclkout),
+    .rxgearboxslip_in({qsfp2_2_gt_rxgearboxslip_2, qsfp2_2_gt_rxgearboxslip_1, qsfp2_2_gt_rxgearboxslip_4, qsfp2_2_gt_rxgearboxslip_3, qsfp2_1_gt_rxgearboxslip_4, qsfp2_1_gt_rxgearboxslip_2, qsfp2_1_gt_rxgearboxslip_3, qsfp2_1_gt_rxgearboxslip_1}),
+    .gtwiz_userdata_rx_out({qsfp2_2_gt_rxdata_2, qsfp2_2_gt_rxdata_1, qsfp2_2_gt_rxdata_4, qsfp2_2_gt_rxdata_3, qsfp2_1_gt_rxdata_4, qsfp2_1_gt_rxdata_2, qsfp2_1_gt_rxdata_3, qsfp2_1_gt_rxdata_1}),
+    .rxdatavalid_out({qsfp2_2_gt_rxdatavalid_2, qsfp2_2_gt_rxdatavalid_1, qsfp2_2_gt_rxdatavalid_4, qsfp2_2_gt_rxdatavalid_3, qsfp2_1_gt_rxdatavalid_4, qsfp2_1_gt_rxdatavalid_2, qsfp2_1_gt_rxdatavalid_3, qsfp2_1_gt_rxdatavalid_1}),
+    .rxheader_out({qsfp2_2_gt_rxheader_2, qsfp2_2_gt_rxheader_1, qsfp2_2_gt_rxheader_4, qsfp2_2_gt_rxheader_3, qsfp2_1_gt_rxheader_4, qsfp2_1_gt_rxheader_2, qsfp2_1_gt_rxheader_3, qsfp2_1_gt_rxheader_1}),
+    .rxheadervalid_out({qsfp2_2_gt_rxheadervalid_2, qsfp2_2_gt_rxheadervalid_1, qsfp2_2_gt_rxheadervalid_4, qsfp2_2_gt_rxheadervalid_3, qsfp2_1_gt_rxheadervalid_4, qsfp2_1_gt_rxheadervalid_2, qsfp2_1_gt_rxheadervalid_3, qsfp2_1_gt_rxheadervalid_1}),
+    .rxoutclk_out({gt2_rxclkout[5:4], gt2_rxclkout[7:6], gt2_rxclkout[3], gt2_rxclkout[1], gt2_rxclkout[2], gt2_rxclkout[0]}),
     .rxpmaresetdone_out(gt2_rxpmaresetdone),
     .rxprgdivresetdone_out(gt2_rxprgdivresetdone),
     .rxstartofseq_out(),

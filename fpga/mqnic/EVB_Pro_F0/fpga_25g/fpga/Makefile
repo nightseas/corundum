@@ -81,6 +81,10 @@ XDC_FILES += ../../../common/syn/tdma_ber_ch.tcl
 # IP
 IP_TCL_FILES = ip/pcie4_uscale_plus_0.tcl
 IP_TCL_FILES += ip/gtwizard_ultrascale_0.tcl
+IP_TCL_FILES += ip/pcie4_uscale_plus_1.tcl
+IP_TCL_FILES += ip/gtwizard_ultrascale_1.tcl
+IP_TCL_FILES += ip/pcie4_uscale_plus_2.tcl
+IP_TCL_FILES += ip/gtwizard_ultrascale_2.tcl
 
 include ../common/vivado.mk
 

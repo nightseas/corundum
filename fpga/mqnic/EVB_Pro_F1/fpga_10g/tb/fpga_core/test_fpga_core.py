@@ -316,8 +316,8 @@ class TB(object):
         # dut.btnc.setimmediatevalue(0)
         # dut.sw.setimmediatevalue(0)
 
-        dut.i2c_scl_i.setimmediatevalue(1)
-        dut.i2c_sda_i.setimmediatevalue(1)
+        # dut.i2c_scl_i.setimmediatevalue(1)
+        # dut.i2c_sda_i.setimmediatevalue(1)
 
         dut.qsfp1_rx_error_count_1.setimmediatevalue(0)
         dut.qsfp1_rx_error_count_2.setimmediatevalue(0)

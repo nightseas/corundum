@@ -5,7 +5,7 @@
 This design targets the FPGA0 device on FPGA-EVB-Pro board.
 
 FPGA: xcvu9p-flga2577-2-i
-PHY: 25G BASE-R PHY IP core and internal GTY transceiver
+PHY: 10G BASE-R PHY IP core and internal GTY transceiver
 
 ## How to build
 

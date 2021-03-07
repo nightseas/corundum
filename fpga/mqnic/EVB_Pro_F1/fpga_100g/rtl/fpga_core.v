@@ -206,9 +206,9 @@ parameter PTP_PERIOD_FNS = 32'd0;
 // FW and board IDs
 parameter FW_ID = 32'd0;
 parameter FW_VER = {16'd0, 16'd1};
-parameter BOARD_ID = {16'h10ee, 16'h90D0};
+parameter BOARD_ID = {16'h10ee, 16'h90D1};
 parameter BOARD_VER = {16'd0, 16'd1};
-parameter FPGA_ID = 32'h0;
+parameter FPGA_ID = 32'h14B31093;
 
 // Structural parameters
 parameter IF_COUNT = 1;

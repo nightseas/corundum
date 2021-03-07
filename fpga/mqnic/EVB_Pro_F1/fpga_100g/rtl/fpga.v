@@ -397,7 +397,7 @@ reg [3:0] qspi_0_dq_o_reg;
 reg [3:0] qspi_0_dq_oe_reg;
 reg qspi_0_cs_reg;
 
-always @(posedge pcie_user_clk) begin
+always @(posedge pcie1_user_clk) begin
     qspi_clk_reg <= qspi_clk_int;
     qspi_0_dq_o_reg <= qspi_0_dq_o_int;
     qspi_0_dq_oe_reg <= qspi_0_dq_oe_int;
@@ -409,7 +409,7 @@ sync_signal #(
     .N(2)
 )
 flash_sync_signal_inst (
-    .clk(pcie_user_clk),
+    .clk(pcie1_user_clk),
     .in(qspi_0_dq_int),
     .out(qspi_0_dq_i_int)
 );

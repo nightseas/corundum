@@ -1,4 +1,4 @@
-# XDC constraints for the FPGA-EVB-Pro FPGA0 (all 3 dies)
+# XDC constraints for the FPGA-EVB-Pro FPGA1 (all 3 dies)
 # part: xcvu9p-flga2577-2-i
 
 # General configuration
@@ -34,10 +34,10 @@ set_property -dict {LOC N24 IOSTANDARD LVCMOS18 SLEW SLOW DRIVE 8} [get_ports us
 # set_property -dict {LOC N37 IOSTANDARD LVCMOS18 SLEW SLOW DRIVE 8} [get_ports i2c_sda]
 
 
-############################### FPGA0 D0 ###############################
+############################### FPGA1 D0 ###############################
 
 # QSFP28-A port
-# Serdes ordered not swapped in FPGA, need to swap in software
+# Serdes ordered not swapped in FPGA, serdes swap handled by CMAC
 #   QSFP    MGT_TRX
 #   0       0
 #   1       2
@@ -137,10 +137,10 @@ create_clock -period 10 -name pcie0_mgt_refclk_0 [get_ports pcie0_refclk_0_p]
 #create_clock -period 10 -name pcie0_mgt_refclk_1 [get_ports pcie0_refclk_1_p]
 
 
-############################### FPGA0 D1 ###############################
+############################### FPGA1 D1 ###############################
 
 # QSFP28-B port
-# Serdes ordered not swapped in FPGA, need to swap in software
+# Serdes ordered not swapped in FPGA, serdes swap handled by CMAC
 #   QSFP    MGT_TRX
 #   0       0
 #   1       2
@@ -242,10 +242,10 @@ create_clock -period 10 -name pcie1_mgt_refclk_0 [get_ports pcie1_refclk_0_p]
 #create_clock -period 10 -name pcie1_mgt_refclk_1 [get_ports pcie1_refclk_1_p]
 
 
-############################### FPGA0 D2 ###############################
+############################### FPGA1 D2 ###############################
 
 # QSFP28-C port
-# Serdes ordered not swapped in FPGA, need to swap in software
+# Serdes ordered not swapped in FPGA, serdes swap handled by CMAC
 #   QSFP    MGT_TRX
 #   0       0
 #   1       2

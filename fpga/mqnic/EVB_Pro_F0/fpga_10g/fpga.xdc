@@ -95,7 +95,7 @@ set_property -dict {LOC BB4  } [get_ports qsfp0_2_rx4_p] ;# MGTYRXN3_222 GTYE4_C
 #set_property -dict {LOC M1  } [get_ports qsfp0_2_rx4_n] ;# MGTYRXP3_222 GTYE4_CHANNEL_X1Y15 / GTYE4_COMMON_X1Y3
 set_property -dict {LOC BB9  } [get_ports qsfp0_2_tx4_p] ;# MGTYTXN3_222 GTYE4_CHANNEL_X1Y15 / GTYE4_COMMON_X1Y3
 #set_property -dict {LOC H6  } [get_ports qsfp0_2_tx4_n] ;# MGTYTXP3_222 GTYE4_CHANNEL_X1Y15 / GTYE4_COMMON_X1Y3
-set_property -dict {LOC AV13  } [get_ports qsfp0_2_mgt_refclk_0_p] ;# MGTREFCLK0P_222
+# set_property -dict {LOC AV13  } [get_ports qsfp0_2_mgt_refclk_0_p] ;# MGTREFCLK0P_222
 #set_property -dict {LOC R8  } [get_ports qsfp0_2_mgt_refclk_0_n] ;# MGTREFCLK0N_222
 
 # # 161.1328125 MHz MGT reference clock
@@ -201,7 +201,7 @@ set_property -dict {LOC AB4  } [get_ports qsfp1_2_rx4_p] ;# MGTYRXN3_227 GTYE4_C
 #set_property -dict {LOC M1  } [get_ports qsfp1_2_rx4_n] ;# MGTYRXP3_227 GTYE4_CHANNEL_X1Y35 / GTYE4_COMMON_X1Y8
 set_property -dict {LOC AB9  } [get_ports qsfp1_2_tx4_p] ;# MGTYTXN3_227 GTYE4_CHANNEL_X1Y35 / GTYE4_COMMON_X1Y8
 #set_property -dict {LOC H6  } [get_ports qsfp1_2_tx4_n] ;# MGTYTXP3_227 GTYE4_CHANNEL_X1Y35 / GTYE4_COMMON_X1Y8
-set_property -dict {LOC AE11  } [get_ports qsfp1_2_mgt_refclk_0_p] ;# MGTREFCLK0P_227
+# set_property -dict {LOC AE11  } [get_ports qsfp1_2_mgt_refclk_0_p] ;# MGTREFCLK0P_227
 #set_property -dict {LOC R8  } [get_ports qsfp1_2_mgt_refclk_0_n] ;# MGTREFCLK0N_227
 
 # # 161.1328125 MHz MGT reference clock
@@ -309,7 +309,7 @@ set_property -dict {LOC H4  } [get_ports qsfp2_2_rx4_p] ;# MGTYRXN1_231 GTYE4_CH
 #set_property -dict {LOC M1  } [get_ports qsfp2_2_rx4_n] ;# MGTYRXP1_231 GTYE4_CHANNEL_X1Y49 / GTYE4_COMMON_X1Y12
 set_property -dict {LOC H9  } [get_ports qsfp2_2_tx4_p] ;# MGTYTXN1_231 GTYE4_CHANNEL_X1Y49 / GTYE4_COMMON_X1Y12
 #set_property -dict {LOC H6  } [get_ports qsfp2_2_tx4_n] ;# MGTYTXP1_231 GTYE4_CHANNEL_X1Y49 / GTYE4_COMMON_X1Y12
-set_property -dict {LOC R11  } [get_ports qsfp2_2_mgt_refclk_0_p] ;# MGTREFCLK0P_231
+# set_property -dict {LOC R11  } [get_ports qsfp2_2_mgt_refclk_0_p] ;# MGTREFCLK0P_231
 #set_property -dict {LOC R8  } [get_ports qsfp2_2_mgt_refclk_0_n] ;# MGTREFCLK0N_231
 
 # # 161.1328125 MHz MGT reference clock

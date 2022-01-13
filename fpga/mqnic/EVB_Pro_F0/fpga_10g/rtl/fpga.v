@@ -49,6 +49,10 @@ module fpga (
      * GPIO
      */
     output wire         user_led,
+    output wire         pll_reset_l,
+    input  wire         pll_lol0,
+    input  wire         pll_hold0,
+    input  wire         pll_lol1,
 
     /*
      * I2C for board management
@@ -56,6 +60,14 @@ module fpga (
     inout  wire         i2c_scl,
     inout  wire         i2c_sda,
 
+    inout  wire         pll_i2c_scl,
+    inout  wire         pll_i2c_sda,
+
+    /*
+     * Etherent recovery clock
+     */
+    output wire         clk_rec_pll_p,
+    output wire         clk_rec_pll_n,
     /*
      *************** FPGA0 D0 ***************
      */
@@ -343,6 +355,77 @@ clk_mmcm_inst (
     .LOCKED(mmcm_locked)
 );
 
+
+wire mmcm_rec_rst0 = pcie1_user_reset;
+wire mmcm_rec_out_int;
+wire mmcm_rec_clkfb0;
+
+// MMCM instance
+// 156.25 MHz in, 25 MHz out
+// PFD range: 10 MHz to 500 MHz
+// VCO range: 800 MHz to 1600 MHz
+// M = 8, D = 1 sets Fvco = 1250 MHz (in range)
+// Divide by 50 to get output frequency of 25 MHz
+MMCME4_BASE #(
+    .BANDWIDTH("OPTIMIZED"),
+    .CLKOUT0_DIVIDE_F(50),
+    .CLKOUT0_DUTY_CYCLE(0.5),
+    .CLKOUT0_PHASE(0),
+    .CLKOUT1_DIVIDE(11),
+    .CLKOUT1_DUTY_CYCLE(0.5),
+    .CLKOUT1_PHASE(0),
+    .CLKOUT2_DIVIDE(11),
+    .CLKOUT2_DUTY_CYCLE(0.5),
+    .CLKOUT2_PHASE(0),
+    .CLKOUT3_DIVIDE(1),
+    .CLKOUT3_DUTY_CYCLE(0.5),
+    .CLKOUT3_PHASE(0),
+    .CLKOUT4_DIVIDE(1),
+    .CLKOUT4_DUTY_CYCLE(0.5),
+    .CLKOUT4_PHASE(0),
+    .CLKOUT5_DIVIDE(1),
+    .CLKOUT5_DUTY_CYCLE(0.5),
+    .CLKOUT5_PHASE(0),
+    .CLKOUT6_DIVIDE(1),
+    .CLKOUT6_DUTY_CYCLE(0.5),
+    .CLKOUT6_PHASE(0),
+    .CLKFBOUT_MULT_F(8),
+    .CLKFBOUT_PHASE(0),
+    .DIVCLK_DIVIDE(1),
+    .REF_JITTER1(0.010),
+    .CLKIN1_PERIOD(6.4),
+    .STARTUP_WAIT("FALSE"),
+    .CLKOUT4_CASCADE("FALSE")
+)
+recclk_mmcm_inst0 (
+    .CLKIN1(gt0_rxusrclk[0]),
+    .CLKFBIN(mmcm_rec_clkfb0),
+    .RST(mmcm_rec_rst0),
+    .PWRDWN(1'b0),
+    .CLKOUT0(mmcm_rec_out_int),
+    .CLKOUT0B(),
+    .CLKOUT1(),
+    .CLKOUT1B(),
+    .CLKOUT2(),
+    .CLKOUT2B(),
+    .CLKOUT3(),
+    .CLKOUT3B(),
+    .CLKOUT4(),
+    .CLKOUT5(),
+    .CLKOUT6(),
+    .CLKFBOUT(mmcm_rec_clkfb0),
+    .CLKFBOUTB(),
+    .LOCKED()
+);
+
+OBUFDS
+clk_rec_obufds_inst (
+    .I(mmcm_rec_out_int),
+    .O(clk_rec_pll_p),
+    .OB(clk_rec_pll_n)
+);
+
+
 BUFG
 clk_125mhz_bufg_inst0 (
     .I(clk_125mhz_mmcm_out0),
@@ -390,6 +473,10 @@ sync_reset_125mhz_inst2 (
 
 
 // GPIO
+wire pll_lol0_int;
+wire pll_hold0_int;
+wire pll_lol1_int;
+
 wire i2c_scl_i;
 wire i2c_scl_o;
 wire i2c_scl_t;
@@ -409,18 +496,40 @@ always @(posedge pcie1_user_clk) begin
     i2c_sda_t_reg <= i2c_sda_t;
 end
 
+wire pll_i2c_scl_i;
+wire pll_i2c_scl_o;
+wire pll_i2c_scl_t;
+wire pll_i2c_sda_i;
+wire pll_i2c_sda_o;
+wire pll_i2c_sda_t;
+
+reg pll_i2c_scl_o_reg;
+reg pll_i2c_scl_t_reg;
+reg pll_i2c_sda_o_reg;
+reg pll_i2c_sda_t_reg;
+
+always @(posedge pcie1_user_clk) begin
+    pll_i2c_scl_o_reg <= pll_i2c_scl_o;
+    pll_i2c_scl_t_reg <= pll_i2c_scl_t;
+    pll_i2c_sda_o_reg <= pll_i2c_sda_o;
+    pll_i2c_sda_t_reg <= pll_i2c_sda_t;
+end
+
 sync_signal #(
-    .WIDTH(2),
+    .WIDTH(7),
     .N(2)
 )
 sync_signal_inst (
     .clk(pcie1_user_clk),
-    .in({i2c_scl, i2c_sda}),
-    .out({i2c_scl_i, i2c_sda_i})
+    .in({i2c_scl, i2c_sda, pll_i2c_scl, pll_i2c_sda, pll_lol0, pll_hold0, pll_lol1}),
+    .out({i2c_scl_i, i2c_sda_i, pll_i2c_scl_i, pll_i2c_sda_i, pll_lol0_int, pll_hold0_int, pll_lol1_int})
 );
 
 assign i2c_scl = i2c_scl_t_reg ? 1'bz : i2c_scl_o_reg;
 assign i2c_sda = i2c_sda_t_reg ? 1'bz : i2c_sda_o_reg;
+
+assign pll_i2c_scl = pll_i2c_scl_t_reg ? 1'bz : pll_i2c_scl_o_reg;
+assign pll_i2c_sda = pll_i2c_sda_t_reg ? 1'bz : pll_i2c_sda_o_reg;
 
 // Flash
 wire qspi_clk_int;
@@ -1511,6 +1620,10 @@ core_inst0 (
      * GPIO
      */
     .led(),
+    .pll_reset_l(),
+    .pll_lol0(1'b1),
+    .pll_hold0(1'b1),
+    .pll_lol1(1'b1),
 
     /*
      * I2C
@@ -1521,6 +1634,13 @@ core_inst0 (
     .i2c_sda_i(1'b1),
     .i2c_sda_o(),
     .i2c_sda_t(),
+
+    .pll_i2c_scl_i(1'b1),
+    .pll_i2c_scl_o(),
+    .pll_i2c_scl_t(),
+    .pll_i2c_sda_i(1'b1),
+    .pll_i2c_sda_o(),
+    .pll_i2c_sda_t(),
 
     /*
      * PCIe
@@ -2628,6 +2748,10 @@ core_inst1 (
      * GPIO
      */
     .led(user_led),
+    .pll_reset_l(pll_reset_l),
+    .pll_lol0(pll_lol0_int),
+    .pll_hold0(pll_hold0_int),
+    .pll_lol1(pll_lol1_int),
 
     /*
      * I2C
@@ -2638,6 +2762,13 @@ core_inst1 (
     .i2c_sda_i(i2c_sda_i),
     .i2c_sda_o(i2c_sda_o),
     .i2c_sda_t(i2c_sda_t),
+
+    .pll_i2c_scl_i(pll_i2c_scl_i),
+    .pll_i2c_scl_o(pll_i2c_scl_o),
+    .pll_i2c_scl_t(pll_i2c_scl_t),
+    .pll_i2c_sda_i(pll_i2c_sda_i),
+    .pll_i2c_sda_o(pll_i2c_sda_o),
+    .pll_i2c_sda_t(pll_i2c_sda_t),
 
     /*
      * PCIe
@@ -3745,6 +3876,10 @@ core_inst2 (
      * GPIO
      */
     .led(),
+    .pll_reset_l(),
+    .pll_lol0(1'b1),
+    .pll_hold0(1'b1),
+    .pll_lol1(1'b1),
 
     /*
      * I2C
@@ -3755,6 +3890,13 @@ core_inst2 (
     .i2c_sda_i(1'b1),
     .i2c_sda_o(),
     .i2c_sda_t(),
+
+    .pll_i2c_scl_i(1'b1),
+    .pll_i2c_scl_o(),
+    .pll_i2c_scl_t(),
+    .pll_i2c_sda_i(1'b1),
+    .pll_i2c_sda_o(),
+    .pll_i2c_sda_t(),
 
     /*
      * PCIe

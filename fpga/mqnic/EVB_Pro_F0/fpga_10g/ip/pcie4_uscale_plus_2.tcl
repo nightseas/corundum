@@ -29,5 +29,7 @@ set_property -dict [list \
     CONFIG.mode_selection {Advanced} \
     CONFIG.en_gt_selection {true} \
     CONFIG.select_quad {GTY_Quad_132} \
+    CONFIG.PF0_LINK_STATUS_SLOT_CLOCK_CONFIG {false} \
+    CONFIG.RX_PPM_OFFSET {600} \
 
 ] [get_ips pcie4_uscale_plus_2]

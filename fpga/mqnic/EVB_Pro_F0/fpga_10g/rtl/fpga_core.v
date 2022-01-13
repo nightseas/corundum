@@ -62,6 +62,10 @@ module fpga_core #
      * GPIO
      */
     output wire                               led,
+    output wire                               pll_reset_l,
+    input  wire                               pll_lol0,
+    input  wire                               pll_hold0,
+    input  wire                               pll_lol1,
 
     /*
      * I2C
@@ -72,6 +76,16 @@ module fpga_core #
     input  wire                               i2c_sda_i,
     output wire                               i2c_sda_o,
     output wire                               i2c_sda_t,
+
+    /*
+     * I2C PLL
+     */
+    input  wire                               pll_i2c_scl_i,
+    output wire                               pll_i2c_scl_o,
+    output wire                               pll_i2c_scl_t,
+    input  wire                               pll_i2c_sda_i,
+    output wire                               pll_i2c_sda_o,
+    output wire                               pll_i2c_sda_t,
 
     /*
      * PCIe
@@ -282,8 +296,8 @@ parameter TX_QUEUE_OP_TABLE_SIZE = 32;
 parameter RX_QUEUE_OP_TABLE_SIZE = 32;
 parameter TX_CPL_QUEUE_OP_TABLE_SIZE = TX_QUEUE_OP_TABLE_SIZE;
 parameter RX_CPL_QUEUE_OP_TABLE_SIZE = RX_QUEUE_OP_TABLE_SIZE;
-parameter TX_QUEUE_INDEX_WIDTH = 13;
-parameter RX_QUEUE_INDEX_WIDTH = 8;
+parameter TX_QUEUE_INDEX_WIDTH = 6;
+parameter RX_QUEUE_INDEX_WIDTH = 7;
 parameter TX_CPL_QUEUE_INDEX_WIDTH = TX_QUEUE_INDEX_WIDTH;
 parameter RX_CPL_QUEUE_INDEX_WIDTH = RX_QUEUE_INDEX_WIDTH;
 parameter EVENT_QUEUE_PIPELINE = 3;
@@ -495,6 +509,11 @@ reg axil_csr_rvalid_reg = 1'b0;
 reg i2c_scl_o_reg = 1'b1;
 reg i2c_sda_o_reg = 1'b1;
 
+reg pll_reset_reg = 1'b0;
+
+reg pll_i2c_scl_o_reg = 1'b1;
+reg pll_i2c_sda_o_reg = 1'b1;
+
 reg fpga_boot_reg = 1'b0;
 
 reg qspi_clk_reg = 1'b0;
@@ -532,10 +551,17 @@ assign axil_csr_rdata = axil_csr_rdata_reg;
 assign axil_csr_rresp = 2'b00;
 assign axil_csr_rvalid = axil_csr_rvalid_reg;
 
+assign pll_reset_l = !pll_reset_reg;
+
 assign i2c_scl_o = i2c_scl_o_reg;
 assign i2c_scl_t = i2c_scl_o_reg;
 assign i2c_sda_o = i2c_sda_o_reg;
 assign i2c_sda_t = i2c_sda_o_reg;
+
+assign pll_i2c_scl_o = pll_i2c_scl_o_reg;
+assign pll_i2c_scl_t = pll_i2c_scl_o_reg;
+assign pll_i2c_sda_o = pll_i2c_sda_o_reg;
+assign pll_i2c_sda_t = pll_i2c_sda_o_reg;
 
 assign fpga_boot = fpga_boot_reg;
 
@@ -582,6 +608,21 @@ always @(posedge clk_250mhz) begin
                 end
                 if (axil_csr_wstrb[1]) begin
                     i2c_sda_o_reg <= axil_csr_wdata[9];
+                end
+            end
+            16'h0114: begin
+                // GPIO I2C 1
+                if (axil_csr_wstrb[0]) begin
+                    pll_i2c_scl_o_reg <= axil_csr_wdata[1];
+                end
+                if (axil_csr_wstrb[1]) begin
+                    pll_i2c_sda_o_reg <= axil_csr_wdata[9];
+                end
+            end
+            16'h0120: begin
+                // GPIO MISC
+                if (axil_csr_wstrb[0]) begin
+                    pll_reset_reg <= axil_csr_wdata[0];
                 end
             end
             // Flash
@@ -676,6 +717,20 @@ always @(posedge clk_250mhz) begin
                 axil_csr_rdata_reg[1] <= i2c_scl_o_reg;
                 axil_csr_rdata_reg[8] <= i2c_sda_i;
                 axil_csr_rdata_reg[9] <= i2c_sda_o_reg;
+            end
+            16'h0114: begin
+                // GPIO I2C 1
+                axil_csr_rdata_reg[0] <= pll_i2c_scl_i;
+                axil_csr_rdata_reg[1] <= pll_i2c_scl_o_reg;
+                axil_csr_rdata_reg[8] <= pll_i2c_sda_i;
+                axil_csr_rdata_reg[9] <= pll_i2c_sda_o_reg;
+            end
+            16'h0120: begin
+                // GPIO MISC
+                axil_csr_rdata_reg[0] <= pll_reset_reg;
+                axil_csr_rdata_reg[1] <= pll_lol0;
+                axil_csr_rdata_reg[2] <= pll_hold0;
+                axil_csr_rdata_reg[3] <= pll_lol1;
             end
             // Flash
             16'h0140: axil_csr_rdata_reg <= {8'd2, 8'd8, 8'd2, 8'd0}; // Flash ID

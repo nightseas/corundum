@@ -15,6 +15,13 @@ set_property BITSTREAM.CONFIG.SPI_FALL_EDGE YES        [current_design]
 #set_property -dict {LOC AT17 IOSTANDARD LVCMOS18} [get_ports clk_100mhz]
 #create_clock -period 10.000 -name clk_100mhz [get_ports clk_100mhz]
 
+
+# Recovery clock
+set_property -dict {LOC V36 IOSTANDARD LVDS} [get_ports clk_rec_pll_p]
+set_property -dict {LOC V37 IOSTANDARD LVDS} [get_ports clk_rec_pll_n]
+create_clock -period 40 -name clk_rec_pll [get_ports clk_rec_pll_p]
+
+
 # 161.1328125 MHz
 set_property -dict {LOC R32 IOSTANDARD LVDS} [get_ports clk_161mhz_p]
 set_property EQUALIZATION EQ_LEVEL2 [get_ports clk_161mhz_p]
@@ -29,6 +36,20 @@ set_property -dict {LOC N24 IOSTANDARD LVCMOS18 SLEW SLOW DRIVE 8} [get_ports us
 set_false_path -to [get_ports {user_led}]
 set_output_delay 0 [get_ports {user_led}]
 
+# PLL I/Os
+set_property -dict {LOC U34 IOSTANDARD LVCMOS18 SLEW SLOW DRIVE 8} [get_ports pll_reset_l]
+set_property -dict {LOC V33 IOSTANDARD LVCMOS18 PULLUP true} [get_ports pll_lol0]
+set_property -dict {LOC U32 IOSTANDARD LVCMOS18 PULLUP true} [get_ports pll_hold0]
+set_property -dict {LOC V34 IOSTANDARD LVCMOS18 PULLUP true} [get_ports pll_lol1]
+set_false_path -to [get_ports {pll_reset_l}]
+set_output_delay 0 [get_ports {pll_reset_l}]
+set_false_path -from [get_ports {pll_lol0}]
+set_input_delay 0 [get_ports {pll_lol0}]
+set_false_path -from [get_ports {pll_hold0}]
+set_input_delay 0 [get_ports {pll_hold0}]
+set_false_path -from [get_ports {pll_lol1}]
+set_input_delay 0 [get_ports {pll_lol1}]
+
 # System reset
 #set_property -dict {LOC BH26  IOSTANDARD LVCMOS12} [get_ports sys_reset_n]
 
@@ -40,6 +61,15 @@ set_false_path -to [get_ports {i2c_sda i2c_scl}]
 set_output_delay 0 [get_ports {i2c_sda i2c_scl}]
 set_false_path -from [get_ports {i2c_sda i2c_scl}]
 set_input_delay 0 [get_ports {i2c_sda i2c_scl}]
+
+
+set_property -dict {LOC U36 IOSTANDARD LVCMOS18 SLEW SLOW DRIVE 8} [get_ports pll_i2c_scl]
+set_property -dict {LOC V35 IOSTANDARD LVCMOS18 SLEW SLOW DRIVE 8} [get_ports pll_i2c_sda]
+
+set_false_path -to [get_ports {pll_i2c_sda pll_i2c_scl}]
+set_output_delay 0 [get_ports {pll_i2c_sda pll_i2c_scl}]
+set_false_path -from [get_ports {pll_i2c_sda pll_i2c_scl}]
+set_input_delay 0 [get_ports {pll_i2c_sda pll_i2c_scl}]
 
 
 ############################### FPGA0 D0 ###############################
@@ -134,11 +164,14 @@ set_property -dict {LOC BG32  } [get_ports {pcie0_rx_p[7]}]  ;# MGTYRXP0_119 GTY
 #set_property -dict {LOC AH1  } [get_ports {pcie0_rx_n[7]}]  ;# MGTYRXN0_119 GTYE4_CHANNEL_X0Y0 / GTYE4_COMMON_X0Y0
 set_property -dict {LOC BH39  } [get_ports {pcie0_tx_p[7]}]  ;# MGTYTXP0_119 GTYE4_CHANNEL_X0Y0 / GTYE4_COMMON_X0Y0
 #set_property -dict {LOC AN4  } [get_ports {pcie0_tx_n[7]}]  ;# MGTYTXN0_119 GTYE4_CHANNEL_X0Y0 / GTYE4_COMMON_X0Y0
-set_property -dict {LOC BB39  } [get_ports pcie0_refclk_0_p] ;# MGTREFCLK0P_120
+#set_property -dict {LOC BB39  } [get_ports pcie0_refclk_0_p] ;# MGTREFCLK0P_120
 #set_property -dict {LOC AC8  } [get_ports pcie0_refclk_0_n] ;# MGTREFCLK0N_120
 #set_property -dict {LOC BA41  } [get_ports pcie0_refclk_1_p] ;# MGTREFCLK1P_120
 #set_property -dict {LOC AL8  } [get_ports pcie0_refclk_1_n] ;# MGTREFCLK1N_120
 set_property -dict {LOC AY31 IOSTANDARD LVCMOS18 PULLUP true} [get_ports pcie0_reset_n]
+
+# Local 100MHz async PCIe refernce clock
+set_property -dict {LOC BA41  } [get_ports pcie0_refclk_0_p] ;# MGTREFCLK1P_120
 
 set_false_path -from [get_ports {pcie0_reset_n}]
 set_input_delay 0 [get_ports {pcie0_reset_n}]
@@ -240,11 +273,14 @@ set_property -dict {LOC AU2  } [get_ports {pcie1_rx_p[7]}]  ;# MGTYRXP0_224 GTYE
 #set_property -dict {LOC AH1  } [get_ports {pcie1_rx_n[7]}]  ;# MGTYRXN0_224 GTYE4_CHANNEL_X1Y20 / GTYE4_COMMON_X1Y5
 set_property -dict {LOC AU7  } [get_ports {pcie1_tx_p[7]}]  ;# MGTYTXP0_224 GTYE4_CHANNEL_X1Y20 / GTYE4_COMMON_X1Y5
 #set_property -dict {LOC AN4  } [get_ports {pcie1_tx_n[7]}]  ;# MGTYTXN0_224 GTYE4_CHANNEL_X1Y20 / GTYE4_COMMON_X1Y5
-set_property -dict {LOC AM13  } [get_ports pcie1_refclk_0_p] ;# MGTREFCLK0P_225
+#set_property -dict {LOC AM13  } [get_ports pcie1_refclk_0_p] ;# MGTREFCLK0P_225
 #set_property -dict {LOC AC8  } [get_ports pcie1_refclk_0_n] ;# MGTREFCLK0N_225
 #set_property -dict {LOC AL11  } [get_ports pcie1_refclk_1_p] ;# MGTREFCLK1P_225
 #set_property -dict {LOC AL8  } [get_ports pcie1_refclk_1_n] ;# MGTREFCLK1N_225
 set_property -dict {LOC BB15 IOSTANDARD LVCMOS18 PULLUP true} [get_ports pcie1_reset_n]
+
+# Local 100MHz async PCIe refernce clock
+set_property -dict {LOC AL11  } [get_ports pcie1_refclk_0_p] ;# MGTREFCLK1P_225
 
 set_false_path -from [get_ports {pcie1_reset_n}]
 set_input_delay 0 [get_ports {pcie1_reset_n}]
@@ -349,11 +385,14 @@ set_property -dict {LOC C46  } [get_ports {pcie2_rx_p[7]}]  ;# MGTYRXP0_132 GTYE
 #set_property -dict {LOC AH1  } [get_ports {pcie2_rx_n[7]}]  ;# MGTYRXN0_132 GTYE4_CHANNEL_X0Y55 / GTYE4_COMMON_X0Y13
 set_property -dict {LOC E41  } [get_ports {pcie2_tx_p[7]}]  ;# MGTYTXP0_132 GTYE4_CHANNEL_X0Y55 / GTYE4_COMMON_X0Y13
 #set_property -dict {LOC AN4  } [get_ports {pcie2_tx_n[7]}]  ;# MGTYTXN0_132 GTYE4_CHANNEL_X0Y55 / GTYE4_COMMON_X0Y13
-set_property -dict {LOC N41  } [get_ports pcie2_refclk_0_p] ;# MGTREFCLK0P_132
+#set_property -dict {LOC N41  } [get_ports pcie2_refclk_0_p] ;# MGTREFCLK0P_132
 #set_property -dict {LOC AC8  } [get_ports pcie2_refclk_0_n] ;# MGTREFCLK0N_132
 #set_property -dict {LOC M39  } [get_ports pcie2_refclk_1_p] ;# MGTREFCLK1P_132
 #set_property -dict {LOC AL8  } [get_ports pcie2_refclk_1_n] ;# MGTREFCLK1N_132
 set_property -dict {LOC P23 IOSTANDARD LVCMOS18 PULLUP true} [get_ports pcie2_reset_n]
+
+# Local 100MHz async PCIe refernce clock
+set_property -dict {LOC M39  } [get_ports pcie2_refclk_0_p] ;# MGTREFCLK1P_132
 
 set_false_path -from [get_ports {pcie2_reset_n}]
 set_input_delay 0 [get_ports {pcie2_reset_n}]

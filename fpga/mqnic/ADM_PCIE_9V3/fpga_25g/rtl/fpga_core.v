@@ -429,6 +429,13 @@ module fpga_core #
     output wire                               eeprom_i2c_sda_t,
     output wire                               eeprom_wp,
 
+    input  wire                               pll_i2c_scl_i,
+    output wire                               pll_i2c_scl_o,
+    output wire                               pll_i2c_scl_t,
+    input  wire                               pll_i2c_sda_i,
+    output wire                               pll_i2c_sda_o,
+    output wire                               pll_i2c_sda_t,
+
     /*
      * QSPI flash
      */
@@ -538,6 +545,9 @@ reg qsfp_i2c_sda_o_reg = 1'b1;
 reg eeprom_i2c_scl_o_reg = 1'b1;
 reg eeprom_i2c_sda_o_reg = 1'b1;
 
+reg pll_i2c_scl_o_reg = 1'b1;
+reg pll_i2c_sda_o_reg = 1'b1;
+
 reg fpga_boot_reg = 1'b0;
 
 reg qspi_clk_reg = 1'b0;
@@ -569,6 +579,11 @@ assign eeprom_i2c_scl_t = eeprom_i2c_scl_o_reg;
 assign eeprom_i2c_sda_o = eeprom_i2c_sda_o_reg;
 assign eeprom_i2c_sda_t = eeprom_i2c_sda_o_reg;
 assign eeprom_wp = 1'b0;
+
+assign pll_i2c_scl_o = pll_i2c_scl_o_reg;
+assign pll_i2c_scl_t = pll_i2c_scl_o_reg;
+assign pll_i2c_sda_o = pll_i2c_sda_o_reg;
+assign pll_i2c_sda_t = pll_i2c_sda_o_reg;
 
 assign fpga_boot = fpga_boot_reg;
 
@@ -618,8 +633,18 @@ always @(posedge clk_250mhz) begin
                     eeprom_i2c_sda_o_reg <= ctrl_reg_wr_data[9];
                 end
             end
-            // XCVR GPIO
+            // I2C 2
             RBB+8'h2C: begin
+                // I2C ctrl: control
+                if (ctrl_reg_wr_strb[0]) begin
+                    pll_i2c_scl_o_reg <= ctrl_reg_wr_data[1];
+                end
+                if (ctrl_reg_wr_strb[1]) begin
+                    pll_i2c_sda_o_reg <= ctrl_reg_wr_data[9];
+                end
+            end
+            // XCVR GPIO
+            RBB+8'h3C: begin
                 // XCVR GPIO: control 0123
                 if (ctrl_reg_wr_strb[0]) begin
                     qsfp_reset_reg <= ctrl_reg_wr_data[4];
@@ -629,11 +654,11 @@ always @(posedge clk_250mhz) begin
                 end
             end
             // QSPI flash
-            RBB+8'h3C: begin
+            RBB+8'h4C: begin
                 // SPI flash ctrl: format
                 fpga_boot_reg <= ctrl_reg_wr_data == 32'hFEE1DEAD;
             end
-            RBB+8'h40: begin
+            RBB+8'h50: begin
                 // SPI flash ctrl: control 0
                 if (ctrl_reg_wr_strb[0]) begin
                     qspi_0_dq_o_reg <= ctrl_reg_wr_data[3:0];
@@ -646,7 +671,7 @@ always @(posedge clk_250mhz) begin
                     qspi_0_cs_reg <= ctrl_reg_wr_data[17];
                 end
             end
-            RBB+8'h44: begin
+            RBB+8'h54: begin
                 // SPI flash ctrl: control 1
                 if (ctrl_reg_wr_strb[0]) begin
                     qspi_1_dq_o_reg <= ctrl_reg_wr_data[3:0];
@@ -659,6 +684,7 @@ always @(posedge clk_250mhz) begin
                     qspi_1_cs_reg <= ctrl_reg_wr_data[17];
                 end
             end
+
             default: ctrl_reg_wr_ack_reg <= 1'b0;
         endcase
     end
@@ -691,11 +717,22 @@ always @(posedge clk_250mhz) begin
                 ctrl_reg_rd_data_reg[8] <= eeprom_i2c_sda_i;
                 ctrl_reg_rd_data_reg[9] <= eeprom_i2c_sda_o_reg;
             end
-            // XCVR GPIO
-            RBB+8'h20: ctrl_reg_rd_data_reg <= 32'h0000C101;             // XCVR GPIO: Type
-            RBB+8'h24: ctrl_reg_rd_data_reg <= 32'h00000100;             // XCVR GPIO: Version
-            RBB+8'h28: ctrl_reg_rd_data_reg <= RB_BASE_ADDR+8'h30;       // XCVR GPIO: Next header
+            // I2C 2
+            RBB+8'h20: ctrl_reg_rd_data_reg <= 32'h0000C110;             // I2C ctrl: Type
+            RBB+8'h24: ctrl_reg_rd_data_reg <= 32'h00000100;             // I2C ctrl: Version
+            RBB+8'h28: ctrl_reg_rd_data_reg <= RB_BASE_ADDR+8'h30;       // I2C ctrl: Next header
             RBB+8'h2C: begin
+                // I2C ctrl: control
+                ctrl_reg_rd_data_reg[0] <= pll_i2c_scl_i;
+                ctrl_reg_rd_data_reg[1] <= pll_i2c_scl_o_reg;
+                ctrl_reg_rd_data_reg[8] <= pll_i2c_sda_i;
+                ctrl_reg_rd_data_reg[9] <= pll_i2c_sda_o_reg;
+            end
+            // XCVR GPIO
+            RBB+8'h30: ctrl_reg_rd_data_reg <= 32'h0000C101;             // XCVR GPIO: Type
+            RBB+8'h34: ctrl_reg_rd_data_reg <= 32'h00000100;             // XCVR GPIO: Version
+            RBB+8'h38: ctrl_reg_rd_data_reg <= RB_BASE_ADDR+8'h40;       // XCVR GPIO: Next header
+            RBB+8'h3C: begin
                 // XCVR GPIO: control 0123
                 ctrl_reg_rd_data_reg[0] <= !qsfp_0_modprs_l;
                 ctrl_reg_rd_data_reg[1] <= !qsfp_int_l;
@@ -705,30 +742,31 @@ always @(posedge clk_250mhz) begin
                 ctrl_reg_rd_data_reg[12] <= qsfp_reset_reg;
             end
             // QSPI flash
-            RBB+8'h30: ctrl_reg_rd_data_reg <= 32'h0000C120;             // SPI flash ctrl: Type
-            RBB+8'h34: ctrl_reg_rd_data_reg <= 32'h00000200;             // SPI flash ctrl: Version
-            RBB+8'h38: ctrl_reg_rd_data_reg <= RB_DRP_QSFP_0_BASE;       // SPI flash ctrl: Next header
-            RBB+8'h3C: begin
+            RBB+8'h40: ctrl_reg_rd_data_reg <= 32'h0000C120;             // SPI flash ctrl: Type
+            RBB+8'h44: ctrl_reg_rd_data_reg <= 32'h00000200;             // SPI flash ctrl: Version
+            RBB+8'h48: ctrl_reg_rd_data_reg <= RB_DRP_QSFP_0_BASE;       // SPI flash ctrl: Next header
+            RBB+8'h4C: begin
                 // SPI flash ctrl: format
                 ctrl_reg_rd_data_reg[3:0]   <= 2;                   // configuration (two segments)
                 ctrl_reg_rd_data_reg[7:4]   <= 1;                   // default segment
                 ctrl_reg_rd_data_reg[11:8]  <= 0;                   // fallback segment
                 ctrl_reg_rd_data_reg[31:12] <= 32'h00000000 >> 12;  // first segment size (even split)
             end
-            RBB+8'h40: begin
+            RBB+8'h50: begin
                 // SPI flash ctrl: control 0
                 ctrl_reg_rd_data_reg[3:0] <= qspi_0_dq_i;
                 ctrl_reg_rd_data_reg[11:8] <= qspi_0_dq_oe;
                 ctrl_reg_rd_data_reg[16] <= qspi_clk;
                 ctrl_reg_rd_data_reg[17] <= qspi_0_cs;
             end
-            RBB+8'h44: begin
+            RBB+8'h54: begin
                 // SPI flash ctrl: control 1
                 ctrl_reg_rd_data_reg[3:0] <= qspi_1_dq_i;
                 ctrl_reg_rd_data_reg[11:8] <= qspi_1_dq_oe;
                 ctrl_reg_rd_data_reg[16] <= qspi_clk;
                 ctrl_reg_rd_data_reg[17] <= qspi_1_cs;
             end
+
             default: ctrl_reg_rd_ack_reg <= 1'b0;
         endcase
     end
@@ -747,6 +785,9 @@ always @(posedge clk_250mhz) begin
 
         eeprom_i2c_scl_o_reg <= 1'b1;
         eeprom_i2c_sda_o_reg <= 1'b1;
+
+        pll_i2c_scl_o_reg <= 1'b1;
+        pll_i2c_sda_o_reg <= 1'b1;
 
         fpga_boot_reg <= 1'b0;
 

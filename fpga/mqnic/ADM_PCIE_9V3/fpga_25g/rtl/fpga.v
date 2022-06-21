@@ -248,6 +248,12 @@ module fpga #
     inout  wire         eeprom_i2c_sda,
     output wire         eeprom_wp,
 
+    inout  wire         pll_i2c_scl,
+    inout  wire         pll_i2c_sda,
+
+    output wire         clk_rec_pll_p,
+    output wire         clk_rec_pll_n,
+
     inout  wire [3:0]   qspi_1_dq,
     output wire         qspi_1_cs
 );
@@ -373,6 +379,96 @@ sync_reset_125mhz_inst (
     .out(rst_125mhz_int)
 );
 
+// RX recovery clock qsfp_0_rx_clk_0_int -> BUFG -> MMCM -> OBUFDS
+
+wire clk_gty_rx_rec_bufg;
+wire clk_25mhz_rec_mmcm_out;
+
+// Internal 125 MHz clock
+wire clk_25mhz_rec_int;
+
+wire mmcm_rec_rst = pcie_user_reset;
+wire mmcm_rec_locked;
+wire mmcm_rec_clkfb;
+
+BUFG
+clk_gty_rx_rec_bufg_inst (
+    .I(qsfp_0_rx_clk_0_int),
+    .O(clk_gty_rx_rec_bufg)
+);
+
+// MMCM instance
+// 156.25 MHz in, 25 MHz out
+// PFD range: 10 MHz to 500 MHz
+// VCO range: 800 MHz to 1600 MHz
+// M = 8, D = 1 sets Fvco = 1250 MHz (in range)
+// Divide by 50 to get output frequency of 25 MHz
+MMCME4_BASE #(
+    .BANDWIDTH("OPTIMIZED"),
+    .CLKOUT0_DIVIDE_F(50),
+    .CLKOUT0_DUTY_CYCLE(0.5),
+    .CLKOUT0_PHASE(0),
+    .CLKOUT1_DIVIDE(11),
+    .CLKOUT1_DUTY_CYCLE(0.5),
+    .CLKOUT1_PHASE(0),
+    .CLKOUT2_DIVIDE(11),
+    .CLKOUT2_DUTY_CYCLE(0.5),
+    .CLKOUT2_PHASE(0),
+    .CLKOUT3_DIVIDE(1),
+    .CLKOUT3_DUTY_CYCLE(0.5),
+    .CLKOUT3_PHASE(0),
+    .CLKOUT4_DIVIDE(1),
+    .CLKOUT4_DUTY_CYCLE(0.5),
+    .CLKOUT4_PHASE(0),
+    .CLKOUT5_DIVIDE(1),
+    .CLKOUT5_DUTY_CYCLE(0.5),
+    .CLKOUT5_PHASE(0),
+    .CLKOUT6_DIVIDE(1),
+    .CLKOUT6_DUTY_CYCLE(0.5),
+    .CLKOUT6_PHASE(0),
+    .CLKFBOUT_MULT_F(8),
+    .CLKFBOUT_PHASE(0),
+    .DIVCLK_DIVIDE(1),
+    .REF_JITTER1(0.010),
+    .CLKIN1_PERIOD(6.4),
+    .STARTUP_WAIT("FALSE"),
+    .CLKOUT4_CASCADE("FALSE")
+)
+clk_mmcm_rec_inst (
+    .CLKIN1(clk_gty_rx_rec_bufg),
+    .CLKFBIN(mmcm_rec_clkfb),
+    .RST(mmcm_rec_rst),
+    .PWRDWN(1'b0),
+    .CLKOUT0(clk_25mhz_rec_mmcm_out),
+    .CLKOUT0B(),
+    .CLKOUT1(),
+    .CLKOUT1B(),
+    .CLKOUT2(),
+    .CLKOUT2B(),
+    .CLKOUT3(),
+    .CLKOUT3B(),
+    .CLKOUT4(),
+    .CLKOUT5(),
+    .CLKOUT6(),
+    .CLKFBOUT(mmcm_rec_clkfb),
+    .CLKFBOUTB(),
+    .LOCKED(mmcm_rec_locked)
+);
+
+BUFG
+clk_25mhz_rec_bufg_inst (
+    .I(clk_25mhz_rec_mmcm_out),
+    .O(clk_25mhz_rec_int)
+);
+
+
+OBUFDS
+clk_rec_obufds_inst (
+    .I(clk_25mhz_rec_int),
+    .O(clk_rec_pll_p),
+    .OB(clk_rec_pll_n)
+);
+
 // GPIO
 wire [1:0] user_sw_int;
 wire qsfp_0_modprs_l_int;
@@ -390,6 +486,12 @@ wire eeprom_i2c_scl_t;
 wire eeprom_i2c_sda_i;
 wire eeprom_i2c_sda_o;
 wire eeprom_i2c_sda_t;
+wire pll_i2c_scl_i;
+wire pll_i2c_scl_o;
+wire pll_i2c_scl_t;
+wire pll_i2c_sda_i;
+wire pll_i2c_sda_o;
+wire pll_i2c_sda_t;
 
 reg qsfp_i2c_scl_o_reg;
 reg qsfp_i2c_scl_t_reg;
@@ -399,6 +501,10 @@ reg eeprom_i2c_scl_o_reg;
 reg eeprom_i2c_scl_t_reg;
 reg eeprom_i2c_sda_o_reg;
 reg eeprom_i2c_sda_t_reg;
+reg pll_i2c_scl_o_reg;
+reg pll_i2c_scl_t_reg;
+reg pll_i2c_sda_o_reg;
+reg pll_i2c_sda_t_reg;
 
 always @(posedge pcie_user_clk) begin
     qsfp_i2c_scl_o_reg <= qsfp_i2c_scl_o;
@@ -409,6 +515,10 @@ always @(posedge pcie_user_clk) begin
     eeprom_i2c_scl_t_reg <= eeprom_i2c_scl_t;
     eeprom_i2c_sda_o_reg <= eeprom_i2c_sda_o;
     eeprom_i2c_sda_t_reg <= eeprom_i2c_sda_t;
+    pll_i2c_scl_o_reg <= pll_i2c_scl_o;
+    pll_i2c_scl_t_reg <= pll_i2c_scl_t;
+    pll_i2c_sda_o_reg <= pll_i2c_sda_o;
+    pll_i2c_sda_t_reg <= pll_i2c_sda_t;
 end
 
 debounce_switch #(
@@ -424,23 +534,27 @@ debounce_switch_inst (
 );
 
 sync_signal #(
-    .WIDTH(7),
+    .WIDTH(9),
     .N(2)
 )
 sync_signal_inst (
     .clk(pcie_user_clk),
     .in({qsfp_0_modprs_l, qsfp_1_modprs_l, qsfp_int_l, 
         qsfp_i2c_scl, qsfp_i2c_sda,
-        eeprom_i2c_scl, eeprom_i2c_sda}),
+        eeprom_i2c_scl, eeprom_i2c_sda,
+        pll_i2c_scl, pll_i2c_sda}),
     .out({qsfp_0_modprs_l_int, qsfp_1_modprs_l_int, qsfp_int_l_int, 
         qsfp_i2c_scl_i, qsfp_i2c_sda_i,
-        eeprom_i2c_scl_i, eeprom_i2c_sda_i})
+        eeprom_i2c_scl_i, eeprom_i2c_sda_i,
+        pll_i2c_scl_i, pll_i2c_sda_i})
 );
 
 assign qsfp_i2c_scl = qsfp_i2c_scl_t_reg ? 1'bz : qsfp_i2c_scl_o_reg;
 assign qsfp_i2c_sda = qsfp_i2c_sda_t_reg ? 1'bz : qsfp_i2c_sda_o_reg;
 assign eeprom_i2c_scl = eeprom_i2c_scl_t_reg ? 1'bz : eeprom_i2c_scl_o_reg;
 assign eeprom_i2c_sda = eeprom_i2c_sda_t_reg ? 1'bz : eeprom_i2c_sda_o_reg;
+assign pll_i2c_scl = pll_i2c_scl_t_reg ? 1'bz : pll_i2c_scl_o_reg;
+assign pll_i2c_sda = pll_i2c_sda_t_reg ? 1'bz : pll_i2c_sda_o_reg;
 
 // Flash
 wire qspi_clk_int;
@@ -1736,6 +1850,13 @@ core_inst (
     .eeprom_i2c_sda_o(eeprom_i2c_sda_o),
     .eeprom_i2c_sda_t(eeprom_i2c_sda_t),
     .eeprom_wp(eeprom_wp),
+
+    .pll_i2c_scl_i(pll_i2c_scl_i),
+    .pll_i2c_scl_o(pll_i2c_scl_o),
+    .pll_i2c_scl_t(pll_i2c_scl_t),
+    .pll_i2c_sda_i(pll_i2c_sda_i),
+    .pll_i2c_sda_o(pll_i2c_sda_o),
+    .pll_i2c_sda_t(pll_i2c_sda_t),
 
     /*
      * QSPI flash

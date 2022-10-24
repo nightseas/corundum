@@ -70,7 +70,7 @@ static int mqnic_i2c_get_sda(void *data)
 }
 
 struct mqnic_i2c_bus *mqnic_i2c_bus_create(struct mqnic_dev *mqnic, int index)
-{
+{/*
 	struct mqnic_i2c_bus *bus;
 	struct i2c_algo_bit_data *algo;
 	struct i2c_adapter *adapter;
@@ -127,7 +127,7 @@ struct mqnic_i2c_bus *mqnic_i2c_bus_create(struct mqnic_dev *mqnic, int index)
 	return bus;
 
 err_free_bus:
-	kfree(bus);
+	kfree(bus);*/
 	return NULL;
 }
 

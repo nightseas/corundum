@@ -66,8 +66,8 @@ module fpga_core #
     parameter CLK_PERIOD_NS_DENOM = 1,
 
     // PTP configuration
-    parameter PTP_CLK_PERIOD_NS_NUM = 32,
-    parameter PTP_CLK_PERIOD_NS_DENOM = 5,
+    parameter PTP_CLK_PERIOD_NS_NUM = 1024,
+    parameter PTP_CLK_PERIOD_NS_DENOM = 165,
     parameter PTP_TS_WIDTH = 96,
     parameter PTP_CLOCK_PIPELINE = 0,
     parameter PTP_CLOCK_CDC_PIPELINE = 0,

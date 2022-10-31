@@ -268,8 +268,8 @@ module fpga #
 );
 
 // PTP configuration
-parameter PTP_CLK_PERIOD_NS_NUM = 32;
-parameter PTP_CLK_PERIOD_NS_DENOM = 5;
+parameter PTP_CLK_PERIOD_NS_NUM = 1024;
+parameter PTP_CLK_PERIOD_NS_DENOM = 165;
 parameter PTP_TS_WIDTH = 96;
 parameter PTP_USE_SAMPLE_CLOCK = 1;
 parameter IF_PTP_PERIOD_NS = 6'h6;
@@ -443,6 +443,17 @@ always @(posedge pcie_user_clk) begin
     qspi_0_dq_oe_reg <= qspi_0_dq_oe_int;
     qspi_0_cs_reg <= qspi_0_cs_int;
 end
+
+sync_signal #(
+    .WIDTH(8),
+    .N(1)
+)
+flash_sync_signal_inst (
+    .clk(pcie_user_clk),
+    .in({qspi_0_dq_int}),
+    .out({qspi_0_dq_i_int})
+);
+
 
 STARTUPE3
 startupe3_inst (

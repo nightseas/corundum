@@ -603,6 +603,33 @@ static int mqnic_generic_board_init(struct mqnic_dev *mqnic)
 		// init_mac_list_from_eeprom(mqnic, mqnic->eeprom_i2c_client, 0x000E, MQNIC_MAX_IF);
 
 		break;
+	case MQNIC_BOARD_ID_VU13P:
+
+		request_module("at24");
+		request_module("lm75");
+
+		// I2C adapter
+		adapter = mqnic_i2c_adapter_create(mqnic, 0);
+
+                create_i2c_client(adapter, "tmp75c", 0x48, NULL);
+
+                create_i2c_client(adapter, "tmp75c", 0x49, NULL);
+
+		// I2C adapter
+		adapter = mqnic_i2c_adapter_create(mqnic, 1);
+
+		// QSFP0
+		//mqnic->mod_i2c_client[0] = create_i2c_client(adapter, "24c02", 0x50, NULL);
+
+		// I2C adapter
+		adapter = mqnic_i2c_adapter_create(mqnic, 2);
+
+		// QSFP1
+		//mqnic->mod_i2c_client[1] = create_i2c_client(adapter, "24c02", 0x50, NULL);
+
+		//mqnic->mod_i2c_client_count = 2;
+
+		break;
 	default:
 		dev_warn(mqnic->dev, "Unknown board ID, not performing any board-specific init");
 	}

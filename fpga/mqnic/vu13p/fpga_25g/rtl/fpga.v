@@ -187,12 +187,23 @@ module fpga #
      * GPIO
      */
     output wire [7:0]   led,
+    output wire         led_qsfp1_a,
+    output wire         led_qsfp1_g,
+    output wire         led_qsfp2_a,
+    output wire         led_qsfp2_g,
+    output wire         led_run,
 
     // /*
     //  * I2C for board management
     //  */
-    // inout  wire         i2c_scl,
-    // inout  wire         i2c_sda,
+    inout  wire         i2c_scl,
+    inout  wire         i2c_sda,
+
+    inout  wire         i2c_qsfp1_scl,
+    inout  wire         i2c_qsfp1_sda,
+
+    inout  wire         i2c_qsfp2_scl,
+    inout  wire         i2c_qsfp2_sda,
 
     /*
      * PCI express
@@ -233,10 +244,10 @@ module fpga #
     // output wire         qsfp1_recclk_p,
     // output wire         qsfp1_recclk_n,
     // output wire         qsfp1_modsell,
-    // output wire         qsfp1_resetl,
-    // input  wire         qsfp1_modprsl,
-    // input  wire         qsfp1_intl,
-    // output wire         qsfp1_lpmode,
+    output wire         qsfp1_resetl,
+    input  wire         qsfp1_modprsl,
+    input  wire         qsfp1_intl,
+    output wire         qsfp1_lpmode,
 
     output wire         qsfp2_tx1_p,
     output wire         qsfp2_tx1_n,
@@ -255,16 +266,16 @@ module fpga #
     input  wire         qsfp2_rx4_p,
     input  wire         qsfp2_rx4_n,
     input  wire         qsfp2_mgt_refclk_0_p,
-    input  wire         qsfp2_mgt_refclk_0_n
+    input  wire         qsfp2_mgt_refclk_0_n,
     // input  wire         qsfp2_mgt_refclk_1_p,
     // input  wire         qsfp2_mgt_refclk_1_n,
     // output wire         qsfp2_recclk_p,
     // output wire         qsfp2_recclk_n,
     // output wire         qsfp2_modsell,
-    // output wire         qsfp2_resetl,
-    // input  wire         qsfp2_modprsl,
-    // input  wire         qsfp2_intl,
-    // output wire         qsfp2_lpmode,
+    output wire         qsfp2_resetl,
+    input  wire         qsfp2_modprsl,
+    input  wire         qsfp2_intl,
+    output wire         qsfp2_lpmode
 );
 
 // PTP configuration
@@ -386,28 +397,62 @@ sync_reset_125mhz_inst (
 );
 
 // GPIO
-// wire qsfp1_modprsl_int;
-// wire qsfp2_modprsl_int;
-// wire qsfp1_intl_int;
-// wire qsfp2_intl_int;
-// wire i2c_scl_i;
-// wire i2c_scl_o;
-// wire i2c_scl_t;
-// wire i2c_sda_i;
-// wire i2c_sda_o;
-// wire i2c_sda_t;
+wire qsfp1_modprsl_int;
+wire qsfp2_modprsl_int;
+wire qsfp1_intl_int;
+wire qsfp2_intl_int;
 
-// reg i2c_scl_o_reg;
-// reg i2c_scl_t_reg;
-// reg i2c_sda_o_reg;
-// reg i2c_sda_t_reg;
+wire i2c_scl_i;
+wire i2c_scl_o;
+wire i2c_scl_t;
+wire i2c_sda_i;
+wire i2c_sda_o;
+wire i2c_sda_t;
 
-// always @(posedge pcie_user_clk) begin
-//     i2c_scl_o_reg <= i2c_scl_o;
-//     i2c_scl_t_reg <= i2c_scl_t;
-//     i2c_sda_o_reg <= i2c_sda_o;
-//     i2c_sda_t_reg <= i2c_sda_t;
-// end
+reg i2c_scl_o_reg;
+reg i2c_scl_t_reg;
+reg i2c_sda_o_reg;
+reg i2c_sda_t_reg;
+
+always @(posedge pcie_user_clk) begin
+    i2c_scl_o_reg <= i2c_scl_o;
+    i2c_scl_t_reg <= i2c_scl_t;
+    i2c_sda_o_reg <= i2c_sda_o;
+    i2c_sda_t_reg <= i2c_sda_t;
+end
+
+wire i2c_qsfp1_scl_i;
+wire i2c_qsfp1_scl_o;
+wire i2c_qsfp1_scl_t;
+wire i2c_qsfp1_sda_i;
+wire i2c_qsfp1_sda_o;
+wire i2c_qsfp1_sda_t;
+wire i2c_qsfp2_scl_i;
+wire i2c_qsfp2_scl_o;
+wire i2c_qsfp2_scl_t;
+wire i2c_qsfp2_sda_i;
+wire i2c_qsfp2_sda_o;
+wire i2c_qsfp2_sda_t;
+
+reg i2c_qsfp1_scl_o_reg;
+reg i2c_qsfp1_scl_t_reg;
+reg i2c_qsfp1_sda_o_reg;
+reg i2c_qsfp1_sda_t_reg;
+reg i2c_qsfp2_scl_o_reg;
+reg i2c_qsfp2_scl_t_reg;
+reg i2c_qsfp2_sda_o_reg;
+reg i2c_qsfp2_sda_t_reg;
+
+always @(posedge pcie_user_clk) begin
+    i2c_qsfp1_scl_o_reg <= i2c_qsfp1_scl_o;
+    i2c_qsfp1_scl_t_reg <= i2c_qsfp1_scl_t;
+    i2c_qsfp1_sda_o_reg <= i2c_qsfp1_sda_o;
+    i2c_qsfp1_sda_t_reg <= i2c_qsfp1_sda_t;
+    i2c_qsfp2_scl_o_reg <= i2c_qsfp2_scl_o;
+    i2c_qsfp2_scl_t_reg <= i2c_qsfp2_scl_t;
+    i2c_qsfp2_sda_o_reg <= i2c_qsfp2_sda_o;
+    i2c_qsfp2_sda_t_reg <= i2c_qsfp2_sda_t;
+end
 
 // sync_signal #(
 //     .WIDTH(6),
@@ -423,6 +468,28 @@ sync_reset_125mhz_inst (
 
 // assign i2c_scl = i2c_scl_t_reg ? 1'bz : i2c_scl_o_reg;
 // assign i2c_sda = i2c_sda_t_reg ? 1'bz : i2c_sda_o_reg;
+
+sync_signal #(
+    .WIDTH(10),
+    .N(2)
+)
+sync_signal_inst (
+    .clk(pcie_user_clk),
+    .in({qsfp1_modprsl, qsfp2_modprsl, qsfp1_intl, qsfp2_intl,
+        i2c_scl, i2c_sda, i2c_qsfp1_scl, i2c_qsfp1_sda, i2c_qsfp2_scl, i2c_qsfp2_sda}),
+    .out({qsfp1_modprsl_int, qsfp2_modprsl_int, qsfp1_intl_int, qsfp2_intl_int,
+        i2c_scl_i, i2c_sda_i, i2c_qsfp1_scl_i, i2c_qsfp1_sda_i, i2c_qsfp2_scl_i, i2c_qsfp2_sda_i})
+);
+
+
+assign i2c_scl = i2c_scl_t_reg ? 1'bz : i2c_scl_o_reg;
+assign i2c_sda = i2c_sda_t_reg ? 1'bz : i2c_sda_o_reg;
+
+assign i2c_qsfp1_scl = i2c_qsfp1_scl_t_reg ? 1'bz : i2c_qsfp1_scl_o_reg;
+assign i2c_qsfp1_sda = i2c_qsfp1_sda_t_reg ? 1'bz : i2c_qsfp1_sda_o_reg;
+
+assign i2c_qsfp2_scl = i2c_qsfp2_scl_t_reg ? 1'bz : i2c_qsfp2_scl_o_reg;
+assign i2c_qsfp2_sda = i2c_qsfp2_sda_t_reg ? 1'bz : i2c_qsfp2_sda_o_reg;
 
 // Flash
 wire qspi_clk_int;
@@ -1286,6 +1353,14 @@ assign ptp_clk = qsfp1_mgt_refclk_0_bufg;
 assign ptp_rst = qsfp1_rst;
 assign ptp_sample_clk = clk_125mhz_int;
 
+assign led_qsfp1_a = 1'b1;
+assign led_qsfp1_g = 1'b0;
+
+assign led_qsfp2_a = 1'b1;
+assign led_qsfp2_g = 1'b0;
+
+assign led_run = led[7];
+
 fpga_core #(
     // FW and board IDs
     .FPGA_ID(FPGA_ID),
@@ -1453,18 +1528,26 @@ core_inst (
     // /*
     //  * I2C
     //  */
-    // .i2c_scl_i(i2c_scl_i),
-    // .i2c_scl_o(i2c_scl_o),
-    // .i2c_scl_t(i2c_scl_t),
-    // .i2c_sda_i(i2c_sda_i),
-    // .i2c_sda_o(i2c_sda_o),
-    // .i2c_sda_t(i2c_sda_t),
-    .i2c_scl_i(1'b1),
-    .i2c_scl_o(),
-    .i2c_scl_t(),
-    .i2c_sda_i(1'b1),
-    .i2c_sda_o(),
-    .i2c_sda_t(),
+    .i2c_scl_i(i2c_scl_i),
+    .i2c_scl_o(i2c_scl_o),
+    .i2c_scl_t(i2c_scl_t),
+    .i2c_sda_i(i2c_sda_i),
+    .i2c_sda_o(i2c_sda_o),
+    .i2c_sda_t(i2c_sda_t),
+
+    .i2c_qsfp1_scl_i(i2c_qsfp1_scl_i),
+    .i2c_qsfp1_scl_o(i2c_qsfp1_scl_o),
+    .i2c_qsfp1_scl_t(i2c_qsfp1_scl_t),
+    .i2c_qsfp1_sda_i(i2c_qsfp1_sda_i),
+    .i2c_qsfp1_sda_o(i2c_qsfp1_sda_o),
+    .i2c_qsfp1_sda_t(i2c_qsfp1_sda_t),
+
+    .i2c_qsfp2_scl_i(i2c_qsfp2_scl_i),
+    .i2c_qsfp2_scl_o(i2c_qsfp2_scl_o),
+    .i2c_qsfp2_scl_t(i2c_qsfp2_scl_t),
+    .i2c_qsfp2_sda_i(i2c_qsfp2_sda_i),
+    .i2c_qsfp2_sda_o(i2c_qsfp2_sda_o),
+    .i2c_qsfp2_sda_t(i2c_qsfp2_sda_t),
 
     /*
      * PCIe
@@ -1602,16 +1685,17 @@ core_inst (
     .qsfp1_drp_do(qsfp1_drp_do),
     .qsfp1_drp_rdy(qsfp1_drp_rdy),
 
-    // .qsfp1_modprsl(qsfp1_modprsl_int),
+    .qsfp1_modprsl(qsfp1_modprsl_int),
     // .qsfp1_modsell(qsfp1_modsell),
-    // .qsfp1_resetl(qsfp1_resetl),
-    // .qsfp1_intl(qsfp1_intl_int),
-    // .qsfp1_lpmode(qsfp1_lpmode),
-    .qsfp1_modprsl(),
+    .qsfp1_resetl(qsfp1_resetl),
+    .qsfp1_intl(qsfp1_intl_int),
+    .qsfp1_lpmode(qsfp1_lpmode),
+
+    // .qsfp1_modprsl(),
     .qsfp1_modsell(),
-    .qsfp1_resetl(1'b1),
-    .qsfp1_intl(1'b1),
-    .qsfp1_lpmode(),
+    // .qsfp1_resetl(1'b1),
+    // .qsfp1_intl(1'b1),
+    // .qsfp1_lpmode(),
 
     .qsfp2_tx_clk_1(qsfp2_tx_clk_1_int),
     .qsfp2_tx_rst_1(qsfp2_tx_rst_1_int),
@@ -1671,16 +1755,17 @@ core_inst (
     .qsfp2_drp_do(qsfp2_drp_do),
     .qsfp2_drp_rdy(qsfp2_drp_rdy),
 
-    // .qsfp2_modprsl(qsfp2_modprsl_int),
+    .qsfp2_modprsl(qsfp2_modprsl_int),
     // .qsfp2_modsell(qsfp2_modsell),
-    // .qsfp2_resetl(qsfp2_resetl),
-    // .qsfp2_intl(qsfp2_intl_int),
-    // .qsfp2_lpmode(qsfp2_lpmode),
-    .qsfp2_modprsl(1'b1),
+    .qsfp2_resetl(qsfp2_resetl),
+    .qsfp2_intl(qsfp2_intl_int),
+    .qsfp2_lpmode(qsfp2_lpmode),
+
+    // .qsfp2_modprsl(1'b1),
     .qsfp2_modsell(),
-    .qsfp2_resetl(),
-    .qsfp2_intl(1'b1),
-    .qsfp2_lpmode(),
+    // .qsfp2_resetl(),
+    // .qsfp2_intl(1'b1),
+    // .qsfp2_lpmode(),
 
     /*
      * QSPI flash

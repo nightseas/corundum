@@ -30,11 +30,11 @@ add_cells_to_pblock [get_pblocks pblock_eth0] [get_cells -quiet "qsfp1_cmac_pad_
 add_cells_to_pblock [get_pblocks pblock_eth0] [get_cells -quiet "core_inst/core_inst/core_pcie_inst/core_inst/iface[0].interface_inst/port[0].port_inst/port_tx_inst/tx_async_fifo_inst"]
 add_cells_to_pblock [get_pblocks pblock_eth0] [get_cells -quiet "core_inst/core_inst/core_pcie_inst/core_inst/iface[0].interface_inst/port[0].port_inst/port_rx_inst/rx_async_fifo_inst"]
 add_cells_to_pblock [get_pblocks pblock_eth0] [get_cells -quiet "core_inst/core_inst/core_pcie_inst/core_inst/iface[0].interface_inst/port[0].port_inst/port_tx_inst/tx_cpl_fifo_inst"]
-resize_pblock [get_pblocks pblock_eth0] -add {CLOCKREGION_X0Y8:CLOCKREGION_X0Y11}
+resize_pblock [get_pblocks pblock_eth0] -add {CLOCKREGION_X0Y12:CLOCKREGION_X0Y15}
 
 create_pblock pblock_eth1
 add_cells_to_pblock [get_pblocks pblock_eth1] [get_cells -quiet "qsfp2_cmac_pad_inst"]
 add_cells_to_pblock [get_pblocks pblock_eth1] [get_cells -quiet "core_inst/core_inst/core_pcie_inst/core_inst/iface[1].interface_inst/port[0].port_inst/port_tx_inst/tx_async_fifo_inst"]
 add_cells_to_pblock [get_pblocks pblock_eth1] [get_cells -quiet "core_inst/core_inst/core_pcie_inst/core_inst/iface[1].interface_inst/port[0].port_inst/port_rx_inst/rx_async_fifo_inst"]
 add_cells_to_pblock [get_pblocks pblock_eth1] [get_cells -quiet "core_inst/core_inst/core_pcie_inst/core_inst/iface[1].interface_inst/port[0].port_inst/port_tx_inst/tx_cpl_fifo_inst"]
-resize_pblock [get_pblocks pblock_eth1] -add {CLOCKREGION_X0Y12:CLOCKREGION_X0Y15}
+resize_pblock [get_pblocks pblock_eth1] -add {CLOCKREGION_X0Y8:CLOCKREGION_X0Y11}

@@ -619,15 +619,50 @@ static int mqnic_generic_board_init(struct mqnic_dev *mqnic)
 		adapter = mqnic_i2c_adapter_create(mqnic, 1);
 
 		// QSFP0
-		//mqnic->mod_i2c_client[0] = create_i2c_client(adapter, "24c02", 0x50, NULL);
+		mqnic->mod_i2c_client[0] = create_i2c_client(adapter, "24c02", 0x50, NULL);
 
 		// I2C adapter
 		adapter = mqnic_i2c_adapter_create(mqnic, 2);
 
 		// QSFP1
-		//mqnic->mod_i2c_client[1] = create_i2c_client(adapter, "24c02", 0x50, NULL);
+		mqnic->mod_i2c_client[1] = create_i2c_client(adapter, "24c02", 0x50, NULL);
 
-		//mqnic->mod_i2c_client_count = 2;
+		mqnic->mod_i2c_client_count = 2;
+
+		break;
+
+	case MQNIC_BOARD_ID_GPTU:
+
+		request_module("at24");
+
+		// I2C adapter
+		adapter = mqnic_i2c_adapter_create(mqnic, 0);
+
+		// I2C EEPROM
+		mqnic->eeprom_i2c_client = create_i2c_client(adapter, "24c02", 0x50, NULL);
+
+		// I2C adapter
+		adapter = mqnic_i2c_adapter_create(mqnic, 1);
+
+		// SFP0
+		mqnic->mod_i2c_client[0] = create_i2c_client(adapter, "24c02", 0x50, NULL);
+
+		// I2C adapter
+		adapter = mqnic_i2c_adapter_create(mqnic, 2);
+
+		// SFP1
+		mqnic->mod_i2c_client[1] = create_i2c_client(adapter, "24c02", 0x50, NULL);
+
+		mqnic->mod_i2c_client_count = 2;
+
+		// I2C adapter (TU)
+		adapter = mqnic_i2c_adapter_create(mqnic, 3);
+
+		// I2C adapter (OCXO)
+		adapter = mqnic_i2c_adapter_create(mqnic, 4);
+
+		// I2C adapter (GNSS)
+		adapter = mqnic_i2c_adapter_create(mqnic, 5);
 
 		break;
 	default:

@@ -1045,8 +1045,6 @@ sfp_sync_reset_inst (
 
 eth_xcvr_phy_10g_gty_quad_wrapper #(
     .COUNT(2),
-    .GT_1_TX_POLARITY(1'b1),
-    .GT_2_TX_POLARITY(1'b1),
     .PRBS31_ENABLE(1),
     .TX_SERDES_PIPELINE(1),
     .RX_SERDES_PIPELINE(1),

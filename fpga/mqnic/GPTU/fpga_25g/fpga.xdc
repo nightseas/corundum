@@ -15,6 +15,16 @@ set_property BITSTREAM.CONFIG.SPI_FALL_EDGE YES        [current_design]
 #set_property -dict {LOC D14  IOSTANDARD LVCMOS33} [get_ports clk_10mhz]
 #create_clock -period 100 -name clk_100mhz [get_ports clk_10mhz]
 
+# 250 MHz system clock
+# set_property -dict {LOC E18 IOSTANDARD LVDS DIFF_TERM_ADV TERM_100} [get_ports clk_250mhz_p]
+# set_property -dict {LOC D18 IOSTANDARD LVDS DIFF_TERM_ADV TERM_100} [get_ports clk_250mhz_n]
+# create_clock -period 4 -name clk_sys_250mhz [get_ports clk_250mhz_p]
+
+# 161.1328125 MHz system clock
+# set_property -dict {LOC D19 IOSTANDARD LVDS DIFF_TERM_ADV TERM_100} [get_ports clk_161mhz_p]
+# set_property -dict {LOC D20 IOSTANDARD LVDS DIFF_TERM_ADV TERM_100} [get_ports clk_161mhz_n]
+# create_clock -period 6.206 -name clk_sys_161mhz [get_ports clk_161mhz_p]
+
 # LEDs
 set_property -dict {LOC J12 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports {sfp_1_led}]
 set_property -dict {LOC J13 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports {sfp_2_led}]
@@ -23,9 +33,9 @@ set_property -dict {LOC J14 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports {
 set_false_path -to [get_ports {sfp_1_led sfp_2_led sma_led}]
 set_output_delay 0 [get_ports {sfp_1_led sfp_2_led sma_led}]
 
-set_property -dict {LOC F9  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports {led_sta[0]}]
-set_property -dict {LOC F10 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports {led_sta[1]}]
-set_property -dict {LOC G9  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports {led_sta[2]}]
+set_property -dict {LOC G9  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports {led_sta[0]}]
+set_property -dict {LOC F9  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports {led_sta[1]}]
+set_property -dict {LOC F10 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports {led_sta[2]}]
 set_property -dict {LOC G10 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 12} [get_ports {led_sta[3]}]
 
 set_false_path -to [get_ports {led_sta[*]}]
@@ -40,7 +50,30 @@ set_output_delay 0 [get_ports {sma_out}]
 set_false_path -from [get_ports {sma_in}]
 set_input_delay 0 [get_ports {sma_in}]
 
+# TU Module
+# set_property -dict {LOC AA14 IOSTANDARD LVCMOS33} [get_ports {tu_recclk[0]}]
+# set_property -dict {LOC AB14 IOSTANDARD LVCMOS33} [get_ports {tu_recclk[1]}]
+
+set_property -dict {LOC AB16 IOSTANDARD LVCMOS33} [get_ports {tu_pps_in}]
+set_property -dict {LOC Y15  IOSTANDARD LVCMOS33 SLEW FAST DRIVE 8} [get_ports {tu_pps_out}]
+
+set_false_path -to [get_ports {tu_pps_out}]
+set_output_delay 0 [get_ports {tu_pps_out}]
+set_false_path -from [get_ports {tu_pps_in}]
+set_input_delay 0 [get_ports {tu_pps_in}]
+
+set_property -dict {LOC D15  IOSTANDARD LVCMOS18} [get_ports {tu_sta[0]}]
+set_property -dict {LOC E16  IOSTANDARD LVCMOS18} [get_ports {tu_sta[1]}]
+set_property -dict {LOC E17  IOSTANDARD LVCMOS18} [get_ports {tu_sta[2]}]
+set_property -dict {LOC H16  IOSTANDARD LVCMOS18} [get_ports {tu_sta[3]}]
+
+set_false_path -from [get_ports {tu_sta[*]}]
+set_input_delay 0 [get_ports {tu_sta[*]}]
+
 set_property -dict {LOC E15 IOSTANDARD LVCMOS18 SLEW SLOW DRIVE 8} [get_ports {tu_rstn}]
+
+set_false_path -to [get_ports {tu_rstn}]
+set_output_delay 0 [get_ports {tu_rstn}]
 
 # SFP28 Interfaces
 set_property -dict {LOC D2  } [get_ports sfp_1_rx_p] ;# MGTYRXP0_227 GTYE4_CHANNEL_X0Y12 / GTYE4_COMMON_X0Y3

@@ -224,6 +224,9 @@ module fpga #
     output wire         sfp_2_rs,
 
     output wire         tu_rstn,
+    input  wire [3:0]   tu_sta,
+    output wire         tu_pps_out,
+    input  wire         tu_pps_in,
 
     inout  wire         sfp_1_i2c_scl,
     inout  wire         sfp_1_i2c_sda,
@@ -276,6 +279,8 @@ wire clk_125mhz_mmcm_out;
 wire clk_125mhz_int;
 wire rst_125mhz_int;
 
+wire clk_12mhz_mmcm_out;
+
 wire mmcm_rst = pcie_user_reset;
 wire mmcm_locked;
 wire mmcm_clkfb;
@@ -291,7 +296,7 @@ MMCME4_BASE #(
     .CLKOUT0_DIVIDE_F(7.5),
     .CLKOUT0_DUTY_CYCLE(0.5),
     .CLKOUT0_PHASE(0),
-    .CLKOUT1_DIVIDE(1),
+    .CLKOUT1_DIVIDE(75),
     .CLKOUT1_DUTY_CYCLE(0.5),
     .CLKOUT1_PHASE(0),
     .CLKOUT2_DIVIDE(1),
@@ -324,7 +329,7 @@ clk_mmcm_inst (
     .PWRDWN(1'b0),
     .CLKOUT0(clk_125mhz_mmcm_out),
     .CLKOUT0B(),
-    .CLKOUT1(),
+    .CLKOUT1(clk_12mhz_mmcm_out),
     .CLKOUT1B(),
     .CLKOUT2(),
     .CLKOUT2B(),
@@ -342,6 +347,12 @@ BUFG
 clk_125mhz_bufg_inst (
     .I(clk_125mhz_mmcm_out),
     .O(clk_125mhz_int)
+);
+
+BUFG
+clk_12mhz_bufg_inst (
+    .I(clk_12mhz_mmcm_out),
+    .O(sma_out)
 );
 
 sync_reset #(
@@ -468,6 +479,18 @@ sync_signal_inst (
         tu_i2c_scl_i, tu_i2c_sda_i,
         ocxo_i2c_scl_i, ocxo_i2c_sda_i,
         gnss_i2c_scl_i, gnss_i2c_sda_i})
+);
+
+wire [3:0] tu_sta_int;
+
+sync_signal #(
+    .WIDTH(4),
+    .N(2)
+)
+sync_signal_tu_inst (
+    .clk(pcie_user_clk),
+    .in(tu_sta),
+    .out(tu_sta_int)
 );
 
 assign sfp_1_i2c_scl = sfp_1_i2c_scl_t_reg ? 1'bz : sfp_1_i2c_scl_o_reg;
@@ -1131,10 +1154,7 @@ assign ptp_sample_clk = clk_125mhz_int;
 assign sfp_1_led = sfp_1_rx_status;
 assign sfp_2_led = sfp_2_rx_status;
 
-assign led_sta[0] = !sfp_1_rx_block_lock;
-assign led_sta[1] = !sfp_2_rx_block_lock;
-assign led_sta[2] = sma_led;
-assign led_sta[3] = 1'b0;
+assign led_sta = tu_sta_int;
 
 fpga_core #(
     // FW and board IDs
@@ -1303,7 +1323,7 @@ core_inst (
     .sma_led(sma_led),
 
     .sma_in(sma_in),
-    .sma_out(sma_out),
+    .sma_out(tu_pps_out),
 
     /*
      * PCIe
@@ -1432,6 +1452,7 @@ core_inst (
     .sfp_2_rs(sfp_2_rs),
 
     .tu_rstn(tu_rstn),
+    .tu_sta(tu_sta_int),
 
     .sfp_1_i2c_scl_i(sfp_1_i2c_scl_i),
     .sfp_1_i2c_scl_o(sfp_1_i2c_scl_o),

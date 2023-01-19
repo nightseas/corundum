@@ -342,6 +342,7 @@ module fpga_core #
     output wire                               sfp_2_rs,
 
     output wire                               tu_rstn,
+    input  wire [3:0]                         tu_sta,
 
     input  wire                               sfp_1_i2c_scl_i,
     output wire                               sfp_1_i2c_scl_o,
@@ -513,7 +514,7 @@ assign ctrl_reg_rd_data = ctrl_reg_rd_data_reg | sfp_drp_reg_rd_data;
 assign ctrl_reg_rd_wait = sfp_drp_reg_rd_wait;
 assign ctrl_reg_rd_ack = ctrl_reg_rd_ack_reg | sfp_drp_reg_rd_ack;
 
-assign tu_rstn = tu_rst_reg;
+assign tu_rstn = !tu_rst_reg;
 
 assign sfp_1_pwr_en = sfp_1_pwr_en_reg;
 assign sfp_2_pwr_en = sfp_2_pwr_en_reg;
@@ -773,6 +774,8 @@ always @(posedge clk_250mhz) begin
                 ctrl_reg_rd_data_reg[12] <= sfp_2_pwr_en_reg;
                 ctrl_reg_rd_data_reg[13] <= sfp_2_tx_disable_reg;
                 ctrl_reg_rd_data_reg[14] <= sfp_2_rs_reg;
+                ctrl_reg_rd_data_reg[16] <= tu_rst_reg;
+                ctrl_reg_rd_data_reg[20:17] <= tu_sta;
             end
             // QSPI flash
             RBB+8'h70: ctrl_reg_rd_data_reg <= 32'h0000C120;             // SPI flash ctrl: Type
@@ -814,7 +817,7 @@ always @(posedge clk_250mhz) begin
         sfp_2_tx_disable_reg <= 1'b0;
         sfp_2_rs_reg <= 1'b0;
 
-        tu_rst_reg <= 1'b1;
+        tu_rst_reg <= 1'b0;
 
         sfp_1_i2c_scl_o_reg <= 1'b1;
         sfp_1_i2c_sda_o_reg <= 1'b1;

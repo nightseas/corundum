@@ -57,16 +57,16 @@ set_property -dict {LOC J15  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports s
 set_property -dict {LOC C12  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports sfp_2_pwr_en]
 set_property -dict {LOC E13  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports sfp_1_tx_disable]
 set_property -dict {LOC E12  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports sfp_2_tx_disable]
-set_property -dict {LOC F12  IOSTANDARD LVCMOS33 PULLUP true} [get_ports sfp_1_npres]
-set_property -dict {LOC F14  IOSTANDARD LVCMOS33 PULLUP true} [get_ports sfp_2_npres]
-set_property -dict {LOC C14  IOSTANDARD LVCMOS33 PULLUP true} [get_ports sfp_1_los]
-set_property -dict {LOC C13  IOSTANDARD LVCMOS33 PULLUP true} [get_ports sfp_2_los]
+set_property -dict {LOC F12  IOSTANDARD LVCMOS33} [get_ports sfp_1_npres]
+set_property -dict {LOC F14  IOSTANDARD LVCMOS33} [get_ports sfp_2_npres]
+set_property -dict {LOC C14  IOSTANDARD LVCMOS33} [get_ports sfp_1_los]
+set_property -dict {LOC C13  IOSTANDARD LVCMOS33} [get_ports sfp_2_los]
 set_property -dict {LOC G14  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports sfp_1_rs]
 set_property -dict {LOC H14  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports sfp_2_rs]
-set_property -dict {LOC A10  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8 PULLUP true} [get_ports sfp_1_i2c_scl]
-set_property -dict {LOC C11  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8 PULLUP true} [get_ports sfp_1_i2c_sda]
-set_property -dict {LOC B10  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8 PULLUP true} [get_ports sfp_2_i2c_scl]
-set_property -dict {LOC B11  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8 PULLUP true} [get_ports sfp_2_i2c_sda]
+set_property -dict {LOC A10  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports sfp_1_i2c_scl]
+set_property -dict {LOC C11  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports sfp_1_i2c_sda]
+set_property -dict {LOC B10  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports sfp_2_i2c_scl]
+set_property -dict {LOC B11  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports sfp_2_i2c_sda]
 
 # 161.1328125 MHz MGT reference clock
 create_clock -period 6.206 -name sfp_mgt_refclk [get_ports sfp_mgt_refclk_p]
@@ -82,22 +82,22 @@ set_false_path -from [get_ports {sfp_1_i2c_sda sfp_2_i2c_sda sfp_1_i2c_scl sfp_2
 set_input_delay 0 [get_ports {sfp_1_i2c_sda sfp_2_i2c_sda sfp_1_i2c_scl sfp_2_i2c_scl}]
 
 # I2C interface
-set_property -dict {LOC B9 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8 PULLUP true} [get_ports eeprom_i2c_scl]
-set_property -dict {LOC A9 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8 PULLUP true} [get_ports eeprom_i2c_sda]
+set_property -dict {LOC B9 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports eeprom_i2c_scl]
+set_property -dict {LOC A9 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports eeprom_i2c_sda]
 
 set_false_path -to [get_ports {eeprom_i2c_sda eeprom_i2c_scl}]
 set_output_delay 0 [get_ports {eeprom_i2c_sda eeprom_i2c_scl}]
 set_false_path -from [get_ports {eeprom_i2c_sda eeprom_i2c_scl}]
 set_input_delay 0 [get_ports {eeprom_i2c_sda eeprom_i2c_scl}]
 
-set_property -dict {LOC AE13 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8 PULLUP true} [get_ports tu_i2c_scl]
-set_property -dict {LOC AF13 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8 PULLUP true} [get_ports tu_i2c_sda]
+set_property -dict {LOC AE13 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports tu_i2c_scl]
+set_property -dict {LOC AF13 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports tu_i2c_sda]
 
-set_property -dict {LOC AC14 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8 PULLUP true} [get_ports ocxo_i2c_scl]
-set_property -dict {LOC AC13 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8 PULLUP true} [get_ports ocxo_i2c_sda]
+set_property -dict {LOC AC14 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports ocxo_i2c_scl]
+set_property -dict {LOC AC13 IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports ocxo_i2c_sda]
 
-set_property -dict {LOC J11  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8 PULLUP true} [get_ports gnss_i2c_scl]
-set_property -dict {LOC J10  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8 PULLUP true} [get_ports gnss_i2c_sda]
+set_property -dict {LOC J11  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports gnss_i2c_scl]
+set_property -dict {LOC J10  IOSTANDARD LVCMOS33 SLEW SLOW DRIVE 8} [get_ports gnss_i2c_sda]
 
 set_false_path -to [get_ports {tu_i2c_sda tu_i2c_scl gnss_i2c_sda gnss_i2c_scl ocxo_i2c_sda ocxo_i2c_scl}]
 set_output_delay 0 [get_ports {tu_i2c_sda tu_i2c_scl gnss_i2c_sda gnss_i2c_scl ocxo_i2c_sda ocxo_i2c_scl}]
@@ -140,7 +140,7 @@ set_property -dict {LOC AF7 } [get_ports {pcie_tx_p[7]}] ;# MGTYTXP0_224 GTYE4_C
 set_property -dict {LOC AF6 } [get_ports {pcie_tx_n[7]}] ;# MGTYTXN0_224 GTYE4_CHANNEL_X0Y0 / GTYE4_COMMON_X0Y0
 set_property -dict {LOC V7  } [get_ports pcie_refclk_p] ;# MGTREFCLK0P_225
 set_property -dict {LOC V6  } [get_ports pcie_refclk_n] ;# MGTREFCLK0N_225
-set_property -dict {LOC T19 IOSTANDARD LVCMOS18 PULLUP true} [get_ports pcie_reset_n]
+set_property -dict {LOC T19 IOSTANDARD LVCMOS18} [get_ports pcie_reset_n]
 
 set_false_path -from [get_ports {pcie_reset_n}]
 set_input_delay 0 [get_ports {pcie_reset_n}]

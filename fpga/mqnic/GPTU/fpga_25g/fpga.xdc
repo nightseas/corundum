@@ -51,8 +51,8 @@ set_false_path -from [get_ports {sma_in}]
 set_input_delay 0 [get_ports {sma_in}]
 
 # TU Module
-# set_property -dict {LOC AA14 IOSTANDARD LVCMOS33} [get_ports {tu_recclk[0]}]
-# set_property -dict {LOC AB14 IOSTANDARD LVCMOS33} [get_ports {tu_recclk[1]}]
+set_property -dict {LOC AA14 IOSTANDARD LVCMOS33} [get_ports {tu_recclk[0]}]
+set_property -dict {LOC AB14 IOSTANDARD LVCMOS33} [get_ports {tu_recclk[1]}]
 
 set_property -dict {LOC AB16 IOSTANDARD LVCMOS33} [get_ports {tu_pps_in}]
 set_property -dict {LOC Y15  IOSTANDARD LVCMOS33 SLEW FAST DRIVE 8} [get_ports {tu_pps_out}]

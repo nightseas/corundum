@@ -276,24 +276,25 @@ wire clk_161mhz_int;
 
 wire clk_125mhz_mmcm_out;
 
-// 10G Ethernet recovery clock
+// Ethernet recovery clock
 wire tu_recclk_en;
 
 wire clk_rec_0_pll_out;
-wire en_rec_0_bufgce = tu_recclk_en & sfp_1_rx_status & pll_rec_0_locked;
+wire en_rec_0_bufgce;
 
 wire pll_rec_0_rst = pcie_user_reset;
 wire pll_rec_0_locked;
 wire pll_rec_0_clkfb;
 
 // PLL instance
-// 156.25 MHz in, 25 MHz out
+// 25G configuration
+// 390.625 MHz in, 25 MHz out
 // PFD range: ? MHz to ? MHz
 // VCO range: 750 MHz to 1500 MHz
-// M = 8, D = 1 sets Fvco = 1250 MHz (in range)
+// M = 16, D = 5 sets Fvco = 1250 MHz (in range)
 // Divide by 50 to get output frequency of 25 MHz
 PLLE4_BASE #(
-    .CLKIN_PERIOD(6.4),
+    .CLKIN_PERIOD(2.56),
     .CLKOUT0_DIVIDE(50),
     .CLKOUT0_DUTY_CYCLE(0.5),
     .CLKOUT0_PHASE(0.0),
@@ -301,9 +302,9 @@ PLLE4_BASE #(
     .CLKOUT1_DUTY_CYCLE(0.5),
     .CLKOUT1_PHASE(0.0),
     .CLKOUTPHY_MODE("VCO_2X"),
-    .CLKFBOUT_MULT(8),
+    .CLKFBOUT_MULT(16),
     .CLKFBOUT_PHASE(0.0),
-    .DIVCLK_DIVIDE(1),
+    .DIVCLK_DIVIDE(5),
     .IS_CLKFBIN_INVERTED(1'b0),
     .IS_CLKIN_INVERTED(1'b0),
     .IS_PWRDWN_INVERTED(1'b0),
@@ -324,6 +325,56 @@ rec_0_pll_inst (
     .CLKFBOUT(pll_rec_0_clkfb),
     .CLKOUTPHYEN(1'b0),
     .PWRDWN(1'b0)
+);
+
+// 10G configuration
+// 156.25 MHz in, 25 MHz out
+// PFD range: ? MHz to ? MHz
+// VCO range: 750 MHz to 1500 MHz
+// M = 8, D = 1 sets Fvco = 1250 MHz (in range)
+// Divide by 50 to get output frequency of 25 MHz
+// PLLE4_BASE #(
+//     .CLKIN_PERIOD(6.4),
+//     .CLKOUT0_DIVIDE(50),
+//     .CLKOUT0_DUTY_CYCLE(0.5),
+//     .CLKOUT0_PHASE(0.0),
+//     .CLKOUT1_DIVIDE(1),
+//     .CLKOUT1_DUTY_CYCLE(0.5),
+//     .CLKOUT1_PHASE(0.0),
+//     .CLKOUTPHY_MODE("VCO_2X"),
+//     .CLKFBOUT_MULT(8),
+//     .CLKFBOUT_PHASE(0.0),
+//     .DIVCLK_DIVIDE(1),
+//     .IS_CLKFBIN_INVERTED(1'b0),
+//     .IS_CLKIN_INVERTED(1'b0),
+//     .IS_PWRDWN_INVERTED(1'b0),
+//     .IS_RST_INVERTED(1'b0),
+//     .REF_JITTER(0.0),
+//     .STARTUP_WAIT("FALSE")
+// )
+// rec_0_pll_inst (
+//     .CLKIN(sfp_1_rx_clk_int),
+//     .CLKFBIN(pll_rec_0_clkfb),
+//     .RST(pll_rec_0_rst),
+//     .CLKOUT0(clk_rec_0_pll_out),
+//     .CLKOUT0B(),
+//     .CLKOUT1(),
+//     .CLKOUT1B(),
+//     .CLKOUTPHY(),
+//     .LOCKED(pll_rec_0_locked),
+//     .CLKFBOUT(pll_rec_0_clkfb),
+//     .CLKOUTPHYEN(1'b0),
+//     .PWRDWN(1'b0)
+// );
+
+
+sync_reset #(
+    .N(4)
+)
+sync_reset_rec_0_bufgce_inst (
+    .clk(clk_rec_0_pll_out),
+    .rst(tu_recclk_en & sfp_1_rx_status & pll_rec_0_locked),
+    .out(en_rec_0_bufgce)
 );
 
 BUFGCE #(

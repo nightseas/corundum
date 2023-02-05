@@ -193,6 +193,7 @@ struct mqnic_dev {
 
 	struct ptp_clock *ptp_clock;
 	struct ptp_clock_info ptp_clock_info;
+	struct delayed_work	extts_work;
 
 	struct mqnic_board_ops *board_ops;
 

@@ -611,9 +611,9 @@ static int mqnic_generic_board_init(struct mqnic_dev *mqnic)
 		// I2C adapter
 		adapter = mqnic_i2c_adapter_create(mqnic, 0);
 
-                create_i2c_client(adapter, "tmp75c", 0x48, NULL);
+		create_i2c_client(adapter, "tmp75c", 0x48, NULL);
 
-                create_i2c_client(adapter, "tmp75c", 0x49, NULL);
+		create_i2c_client(adapter, "tmp75c", 0x49, NULL);
 
 		// I2C adapter
 		adapter = mqnic_i2c_adapter_create(mqnic, 1);
@@ -634,6 +634,7 @@ static int mqnic_generic_board_init(struct mqnic_dev *mqnic)
 	case MQNIC_BOARD_ID_GPTU:
 
 		request_module("at24");
+		request_module("ptp_clockmatrix");
 
 		// I2C adapter
 		adapter = mqnic_i2c_adapter_create(mqnic, 0);
@@ -657,6 +658,8 @@ static int mqnic_generic_board_init(struct mqnic_dev *mqnic)
 
 		// I2C adapter (TU)
 		adapter = mqnic_i2c_adapter_create(mqnic, 3);
+
+		create_i2c_client(adapter, "8a34000", 0x5b, NULL);
 
 		// I2C adapter (OCXO)
 		adapter = mqnic_i2c_adapter_create(mqnic, 4);

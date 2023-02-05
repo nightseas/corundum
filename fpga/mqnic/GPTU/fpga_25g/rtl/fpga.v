@@ -178,6 +178,12 @@ module fpga #
 )
 (
     /*
+     * System clocks
+     */
+    input  wire         clk_250mhz_p,
+    input  wire         clk_250mhz_n,
+    
+    /*
      * GPIO
      */
     output wire         sfp_1_led,
@@ -223,12 +229,18 @@ module fpga #
     output wire         sfp_1_rs,
     output wire         sfp_2_rs,
 
+    /*
+     * TU interfaces
+     */
     output wire         tu_rstn,
     input  wire [3:0]   tu_sta,
     output wire         tu_pps_out,
     input  wire         tu_pps_in,
     output wire [1:0]   tu_recclk,
 
+    /*
+     * Management interfaces
+     */
     inout  wire         sfp_1_i2c_scl,
     inout  wire         sfp_1_i2c_sda,
     inout  wire         sfp_2_i2c_scl,
@@ -244,13 +256,16 @@ module fpga #
     inout  wire         gnss_i2c_scl,
     inout  wire         gnss_i2c_sda,
 
+    /*
+     * QSPI Flash
+     */
     inout  wire [3:0]   qspi_1_dq,
     output wire         qspi_1_cs
 );
 
 // PTP configuration
-parameter PTP_CLK_PERIOD_NS_NUM = 1024;
-parameter PTP_CLK_PERIOD_NS_DENOM = 165;
+parameter PTP_CLK_PERIOD_NS_NUM = 4;
+parameter PTP_CLK_PERIOD_NS_DENOM = 1;
 parameter PTP_TS_WIDTH = 96;
 parameter PTP_USE_SAMPLE_CLOCK = 1;
 parameter IF_PTP_PERIOD_NS = 6'h2;
@@ -275,6 +290,84 @@ wire pcie_user_reset;
 wire clk_161mhz_int;
 
 wire clk_125mhz_mmcm_out;
+
+// 250MHz PTP clock
+wire clk_250mhz_int;
+wire rst_250mhz_int;
+
+wire clk_250mhz_ibufg;
+
+IBUFGDS #(
+   .DIFF_TERM("FALSE"),
+   .IBUF_LOW_PWR("FALSE")   
+)
+clk_250mhz_ibufg_inst (
+   .O   (clk_250mhz_ibufg),
+   .I   (clk_250mhz_p),
+   .IB  (clk_250mhz_n) 
+);
+
+
+wire clk_ptpclk_pll_out;
+wire pll_ptpclk_rst = pcie_user_reset;
+wire pll_ptpclk_locked;
+wire pll_ptpclk_clkfb;
+
+// PLL instance
+// 250 MHz in, 250 MHz out
+// PFD range: ? MHz to ? MHz
+// VCO range: 750 MHz to 1500 MHz
+// M = 4, D = 1 sets Fvco = 1000 MHz (in range)
+// Divide by 4 to get output frequency of 250 MHz
+PLLE4_BASE #(
+    .CLKIN_PERIOD(4),
+    .CLKOUT0_DIVIDE(4),
+    .CLKOUT0_DUTY_CYCLE(0.5),
+    .CLKOUT0_PHASE(0.0),
+    .CLKOUT1_DIVIDE(1),
+    .CLKOUT1_DUTY_CYCLE(0.5),
+    .CLKOUT1_PHASE(0.0),
+    .CLKOUTPHY_MODE("VCO_2X"),
+    .CLKFBOUT_MULT(4),
+    .CLKFBOUT_PHASE(0.0),
+    .DIVCLK_DIVIDE(1),
+    .IS_CLKFBIN_INVERTED(1'b0),
+    .IS_CLKIN_INVERTED(1'b0),
+    .IS_PWRDWN_INVERTED(1'b0),
+    .IS_RST_INVERTED(1'b0),
+    .REF_JITTER(0.0),
+    .STARTUP_WAIT("FALSE")
+)
+ptpclk_pll_inst (
+    .CLKIN(clk_250mhz_ibufg),
+    .CLKFBIN(pll_ptpclk_clkfb), 
+    .RST(pll_ptpclk_rst),       
+    .CLKOUT0(clk_ptpclk_pll_out),
+    .CLKOUT0B(),
+    .CLKOUT1(),
+    .CLKOUT1B(),
+    .CLKOUTPHY(),
+    .LOCKED(pll_ptpclk_locked),
+    .CLKFBOUT(pll_ptpclk_clkfb),
+    .CLKOUTPHYEN(1'b0),
+    .PWRDWN(1'b0)
+);
+
+BUFG
+clk_250mhz_bufg_inst (
+    .I(clk_ptpclk_pll_out),
+    .O(clk_250mhz_int)
+);
+
+sync_reset #(
+    .N(4)
+)
+sync_reset_250mhz_inst (
+    .clk(clk_250mhz_int),
+    .rst(~pll_ptpclk_locked),
+    .out(rst_250mhz_int)
+);
+
 
 // Ethernet recovery clock
 wire tu_recclk_en;
@@ -1263,8 +1356,8 @@ wire ptp_clk;
 wire ptp_rst;
 wire ptp_sample_clk;
 
-assign ptp_clk = sfp_mgt_refclk_bufg;
-assign ptp_rst = sfp_rst;
+assign ptp_clk = clk_250mhz_int;
+assign ptp_rst = rst_250mhz_int;
 assign ptp_sample_clk = clk_125mhz_int;
 
 assign sfp_1_led = sfp_1_rx_status;
@@ -1570,6 +1663,7 @@ core_inst (
     .tu_rstn(tu_rstn),
     .tu_sta(tu_sta_int),
     .tu_recclk_en(tu_recclk_en),
+    .tu_pps_in(tu_pps_in),
 
     .sfp_1_i2c_scl_i(sfp_1_i2c_scl_i),
     .sfp_1_i2c_scl_o(sfp_1_i2c_scl_o),

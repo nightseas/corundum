@@ -344,6 +344,8 @@ module fpga_core #
     output wire                               tu_rstn,
     input  wire [3:0]                         tu_sta,
     output wire                               tu_recclk_en,
+    output wire                               tu_pps_out,
+    input  wire                               tu_pps_in,
 
     input  wire                               sfp_1_i2c_scl_i,
     output wire                               sfp_1_i2c_scl_o,
@@ -409,7 +411,7 @@ parameter AXIL_CSR_ADDR_WIDTH = AXIL_IF_CTRL_ADDR_WIDTH-5-$clog2((PORTS_PER_IF+3
 localparam RB_BASE_ADDR = 16'h1000;
 localparam RBB = RB_BASE_ADDR & {AXIL_CTRL_ADDR_WIDTH{1'b1}};
 
-localparam RB_DRP_SFP_BASE = RB_BASE_ADDR + 16'h100;
+localparam RB_DRP_SFP_BASE = RB_BASE_ADDR + 16'h300;
 
 initial begin
     if (PORT_COUNT > 2) begin
@@ -471,6 +473,11 @@ wire [AXIL_CTRL_DATA_WIDTH-1:0] sfp_drp_reg_rd_data;
 wire sfp_drp_reg_rd_wait;
 wire sfp_drp_reg_rd_ack;
 
+wire extts_valid;
+wire extts_step;
+
+wire [95:0] extts_latched;
+
 reg ctrl_reg_wr_ack_reg = 1'b0;
 reg [AXIL_CTRL_DATA_WIDTH-1:0] ctrl_reg_rd_data_reg = {AXIL_CTRL_DATA_WIDTH{1'b0}};
 reg ctrl_reg_rd_ack_reg = 1'b0;
@@ -509,6 +516,12 @@ reg [3:0] qspi_0_dq_oe_reg = 4'd0;
 reg qspi_1_cs_reg = 1'b1;
 reg [3:0] qspi_1_dq_o_reg = 4'd0;
 reg [3:0] qspi_1_dq_oe_reg = 4'd0;
+
+reg extts_en_reg = 1'b0;
+reg extts_arm_reg = 1'b0;
+
+reg [95:0] set_extts_cali_reg = 0;
+reg set_extts_cali_valid_reg = 1'b0;
 
 assign ctrl_reg_wr_wait = sfp_drp_reg_wr_wait;
 assign ctrl_reg_wr_ack = ctrl_reg_wr_ack_reg | sfp_drp_reg_wr_ack;
@@ -569,6 +582,8 @@ always @(posedge clk_250mhz) begin
     ctrl_reg_wr_ack_reg <= 1'b0;
     ctrl_reg_rd_data_reg <= {AXIL_CTRL_DATA_WIDTH{1'b0}};
     ctrl_reg_rd_ack_reg <= 1'b0;
+
+    extts_arm_reg <= 1'b0;
 
     if (ctrl_reg_wr_en && !ctrl_reg_wr_ack_reg) begin
         // write operation
@@ -688,6 +703,20 @@ always @(posedge clk_250mhz) begin
                     qspi_1_cs_reg <= ctrl_reg_wr_data[17];
                 end
             end
+            RBB+16'h10C: begin
+                // EXTTS control and status
+                if (ctrl_reg_wr_strb[0]) begin
+                    extts_en_reg <= ctrl_reg_wr_data[0];
+                end
+            end
+            RBB+16'h120: set_extts_cali_reg[15:0] <= ctrl_reg_wr_data;  // EXTTS calibration fns
+            RBB+16'h124: set_extts_cali_reg[45:16] <= ctrl_reg_wr_data; // EXTTS calibration ns
+            RBB+16'h128: set_extts_cali_reg[79:48] <= ctrl_reg_wr_data; // EXTTS calibration sec l
+            RBB+16'h12C: begin
+                // EXTTS calibration sec h
+                set_extts_cali_reg[95:80] <= ctrl_reg_wr_data;
+                set_extts_cali_valid_reg <= 1'b1;
+            end
             default: ctrl_reg_wr_ack_reg <= 1'b0;
         endcase
     end
@@ -785,7 +814,7 @@ always @(posedge clk_250mhz) begin
             // QSPI flash
             RBB+8'h70: ctrl_reg_rd_data_reg <= 32'h0000C120;             // SPI flash ctrl: Type
             RBB+8'h74: ctrl_reg_rd_data_reg <= 32'h00000200;             // SPI flash ctrl: Version
-            RBB+8'h78: ctrl_reg_rd_data_reg <= RB_DRP_SFP_BASE;          // SPI flash ctrl: Next header
+            RBB+8'h78: ctrl_reg_rd_data_reg <= RB_BASE_ADDR+16'h100;      // SPI flash ctrl: Next header
             RBB+8'h7C: begin
                 // SPI flash ctrl: format
                 ctrl_reg_rd_data_reg[3:0]   <= 2;                   // configuration (two segments)
@@ -807,6 +836,25 @@ always @(posedge clk_250mhz) begin
                 ctrl_reg_rd_data_reg[16] <= qspi_clk;
                 ctrl_reg_rd_data_reg[17] <= qspi_1_cs;
             end
+            // EXTTS 0
+            RBB+16'h100: ctrl_reg_rd_data_reg <= 32'h0000C088;             // EXTTS ctrl: Type
+            RBB+16'h104: ctrl_reg_rd_data_reg <= 32'h00000100;             // EXTTS ctrl: Version
+            RBB+16'h108: ctrl_reg_rd_data_reg <= RB_BASE_ADDR+16'h300;      // EXTTS ctrl: Next header
+            RBB+16'h10C: begin
+                // EXTTS ctrl: control
+                ctrl_reg_rd_data_reg[0] <= extts_en_reg;
+                ctrl_reg_rd_data_reg[4] <= extts_valid;
+                ctrl_reg_rd_data_reg[5] <= extts_step;
+                extts_arm_reg <= 1'b1;
+            end
+            RBB+16'h110: ctrl_reg_rd_data_reg <= extts_latched[15:0];  // EXTTS latched fns
+            RBB+16'h114: ctrl_reg_rd_data_reg <= extts_latched[45:16]; // EXTTS latched ns
+            RBB+16'h118: ctrl_reg_rd_data_reg <= extts_latched[79:48]; // EXTTS latched sec l
+            RBB+16'h11C: ctrl_reg_rd_data_reg <= extts_latched[95:80]; // EXTTS latched sec h
+            RBB+16'h120: ctrl_reg_rd_data_reg <= set_extts_cali_reg[15:0];  // EXTTS calibration fns
+            RBB+16'h124: ctrl_reg_rd_data_reg <= set_extts_cali_reg[45:16]; // EXTTS calibration ns
+            RBB+16'h128: ctrl_reg_rd_data_reg <= set_extts_cali_reg[79:48]; // EXTTS calibration sec l
+            RBB+16'h12C: ctrl_reg_rd_data_reg <= set_extts_cali_reg[95:80]; // EXTTS calibration sec h
             default: ctrl_reg_rd_ack_reg <= 1'b0;
         endcase
     end
@@ -849,8 +897,42 @@ always @(posedge clk_250mhz) begin
         qspi_1_cs_reg <= 1'b1;
         qspi_1_dq_o_reg <= 4'd0;
         qspi_1_dq_oe_reg <= 4'd0;
+
+        extts_en_reg <= 1'b0;
+        extts_arm_reg <= 1'b0;
+
+        set_extts_cali_reg <= 0;
+        set_extts_cali_valid_reg <= 1'b0;
     end
 end
+
+ptp_extts #(
+    .FNS_ENABLE(1),
+    .EXTTS_CALI_S(0),
+    .EXTTS_CALI_NS(0),
+    .EXTTS_CALI_FNS(0)
+)
+ptp_extts_inst (
+    .clk(clk_250mhz),
+    .rst(rst_250mhz),
+
+    .ptp_clk(ptp_clk),
+    .ptp_rst(ptp_rst),
+
+    .extts_trig_in(tu_pps_in),
+
+    .input_ts_96(ptp_ts_96),
+    .input_ts_step(ptp_ts_step),
+
+    .enable(extts_en_reg),
+    .arm(extts_arm_reg),
+    .input_cali(set_extts_cali_reg),
+    .input_cali_valid(set_extts_cali_valid_reg),
+
+    .extts_latched(extts_latched),
+    .locked(extts_valid),
+    .step(extts_step)
+);
 
 rb_drp #(
     .DRP_ADDR_WIDTH(24),

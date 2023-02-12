@@ -18,7 +18,7 @@ module ptp_extts #
 (
     parameter FNS_ENABLE = 1,
     parameter EXTTS_CALI_S = 48'h0,
-    parameter EXTTS_CALI_NS = 30'h0,
+    parameter EXTTS_CALI_NS = 30'h14,
     parameter EXTTS_CALI_FNS = 16'h0000
 )
 (
@@ -87,6 +87,7 @@ assign step = step_reg;
 assign extts_latched = {time_s_reg[47:0], 2'b00, time_ns_reg[29:0], time_fns_reg[15:0]};
 
 always @(posedge ptp_clk) begin
+    // Sync registers will cause 5 cycles of delay (e.g. 20ns if ptp clock = 250MHz)
     sync_trig_reg[0] <= extts_trig_in;
     sync_trig_reg[1] <= sync_trig_reg[0];
     sync_trig_reg[2] <= sync_trig_reg[1];
@@ -151,6 +152,10 @@ always @(posedge clk) begin
         if (time_step_reg[1]) begin
             step_reg <= 1'b1;
             locked_reg <= 1'b0;
+
+            time_s_reg <= 0;
+            time_ns_reg <= 0;
+            time_fns_reg <= 0;
         end
         // Only support rise edge for now
         else if (time_valid_reg[1]) begin
@@ -161,12 +166,16 @@ always @(posedge clk) begin
             time_ns_reg <= time_ts_sync_1_reg[45:16] - cali_ns_reg;
             if (FNS_ENABLE) begin
                 time_fns_reg <= time_ts_sync_1_reg[15:0] - cali_fns_reg;
-        end
+            end
         end
         // Triggered by control reg reading
         else if (arm) begin
             step_reg <= 1'b0;
             locked_reg <= 1'b0;
+
+            time_s_reg <= 0;
+            time_ns_reg <= 0;
+            time_fns_reg <= 0;
         end
     end
 

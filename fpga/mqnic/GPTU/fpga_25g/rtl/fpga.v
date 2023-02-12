@@ -319,43 +319,58 @@ wire pll_ptpclk_clkfb;
 // VCO range: 750 MHz to 1500 MHz
 // M = 4, D = 1 sets Fvco = 1000 MHz (in range)
 // Divide by 4 to get output frequency of 250 MHz
-PLLE4_BASE #(
-    .CLKIN_PERIOD(4),
-    .CLKOUT0_DIVIDE(4),
-    .CLKOUT0_DUTY_CYCLE(0.5),
-    .CLKOUT0_PHASE(0.0),
-    .CLKOUT1_DIVIDE(1),
-    .CLKOUT1_DUTY_CYCLE(0.5),
-    .CLKOUT1_PHASE(0.0),
-    .CLKOUTPHY_MODE("VCO_2X"),
-    .CLKFBOUT_MULT(4),
-    .CLKFBOUT_PHASE(0.0),
-    .DIVCLK_DIVIDE(1),
-    .IS_CLKFBIN_INVERTED(1'b0),
-    .IS_CLKIN_INVERTED(1'b0),
-    .IS_PWRDWN_INVERTED(1'b0),
-    .IS_RST_INVERTED(1'b0),
-    .REF_JITTER(0.0),
-    .STARTUP_WAIT("FALSE")
-)
-ptpclk_pll_inst (
-    .CLKIN(clk_250mhz_ibufg),
-    .CLKFBIN(pll_ptpclk_clkfb), 
-    .RST(pll_ptpclk_rst),       
-    .CLKOUT0(clk_ptpclk_pll_out),
-    .CLKOUT0B(),
-    .CLKOUT1(),
-    .CLKOUT1B(),
-    .CLKOUTPHY(),
-    .LOCKED(pll_ptpclk_locked),
-    .CLKFBOUT(pll_ptpclk_clkfb),
-    .CLKOUTPHYEN(1'b0),
-    .PWRDWN(1'b0)
-);
+// PLLE4_BASE #(
+//     .CLKIN_PERIOD(4),
+//     .CLKOUT0_DIVIDE(4),
+//     .CLKOUT0_DUTY_CYCLE(0.5),
+//     .CLKOUT0_PHASE(0.0),
+//     .CLKOUT1_DIVIDE(1),
+//     .CLKOUT1_DUTY_CYCLE(0.5),
+//     .CLKOUT1_PHASE(0.0),
+//     .CLKOUTPHY_MODE("VCO_2X"),
+//     .CLKFBOUT_MULT(4),
+//     .CLKFBOUT_PHASE(0.0),
+//     .DIVCLK_DIVIDE(1),
+//     .IS_CLKFBIN_INVERTED(1'b0),
+//     .IS_CLKIN_INVERTED(1'b0),
+//     .IS_PWRDWN_INVERTED(1'b0),
+//     .IS_RST_INVERTED(1'b0),
+//     .REF_JITTER(0.0),
+//     .STARTUP_WAIT("FALSE")
+// )
+// ptpclk_pll_inst (
+//     .CLKIN(clk_250mhz_ibufg),
+//     .CLKFBIN(pll_ptpclk_clkfb),
+//     .RST(pll_ptpclk_rst),
+//     .CLKOUT0(clk_ptpclk_pll_out),
+//     .CLKOUT0B(),
+//     .CLKOUT1(),
+//     .CLKOUT1B(),
+//     .CLKOUTPHY(),
+//     .LOCKED(pll_ptpclk_locked),
+//     .CLKFBOUT(pll_ptpclk_clkfb),
+//     .CLKOUTPHYEN(1'b0),
+//     .PWRDWN(1'b0)
+// );
+
+// BUFG
+// clk_250mhz_bufg_inst (
+//     .I(clk_ptpclk_pll_out),
+//     .O(clk_250mhz_int)
+// );
+
+// sync_reset #(
+//     .N(4)
+// )
+// sync_reset_250mhz_inst (
+//     .clk(clk_250mhz_int),
+//     .rst(~pll_ptpclk_locked),
+//     .out(rst_250mhz_int)
+// );
 
 BUFG
 clk_250mhz_bufg_inst (
-    .I(clk_ptpclk_pll_out),
+    .I(clk_250mhz_ibufg),
     .O(clk_250mhz_int)
 );
 
@@ -364,9 +379,10 @@ sync_reset #(
 )
 sync_reset_250mhz_inst (
     .clk(clk_250mhz_int),
-    .rst(~pll_ptpclk_locked),
+    .rst(pll_ptpclk_rst),
     .out(rst_250mhz_int)
 );
+
 
 
 // Ethernet recovery clock
@@ -558,11 +574,13 @@ clk_125mhz_bufg_inst (
     .O(clk_125mhz_int)
 );
 
-BUFG
-clk_12mhz_bufg_inst (
-    .I(clk_12mhz_mmcm_out),
-    .O(sma_out)
-);
+// BUFG
+// clk_12mhz_bufg_inst (
+//     .I(clk_12mhz_mmcm_out),
+//     .O(sma_out)
+// );
+
+assign tu_pps_out = 1'bz;
 
 sync_reset #(
     .N(4)
@@ -1532,7 +1550,7 @@ core_inst (
     .sma_led(sma_led),
 
     .sma_in(sma_in),
-    .sma_out(tu_pps_out),
+    .sma_out(sma_out),
 
     /*
      * PCIe

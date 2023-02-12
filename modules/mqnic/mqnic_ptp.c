@@ -38,6 +38,7 @@
 
 #define PTP_EXTTS_CH_MAX    2
 #define PTP_EXTTS_PERIOD_MS 95
+#define PTP_EXTTS_STEP_MS   1995
 
 enum mqnic_gptu_ptp_pins {
 	SMAI = 0,
@@ -233,15 +234,7 @@ static int mqnic_phc_extts_gptu(struct ptp_clock_info *ptp, int on, struct ptp_e
 {
 	struct mqnic_dev *mdev = container_of(ptp, struct mqnic_dev, ptp_clock_info);
 	struct mqnic_reg_block *rb;
-
-	struct ptp_clock_event event;
-	// struct timespec64 ts;
-	// u32 dco_delay = 0;
-
 	u32 ctrl = 0;
-
-	// dev_info(mdev->dev, "%s: ptp extts index: 0x%X", __func__, extts->index);
-	// dev_info(mdev->dev, "%s: ptp extts flags: 0x%X", __func__, extts->flags);
 
 	if (extts->index > PTP_EXTTS_CH_MAX)
 		return -EINVAL;
@@ -251,18 +244,18 @@ static int mqnic_phc_extts_gptu(struct ptp_clock_info *ptp, int on, struct ptp_e
 
 	if (!rb)
 	{
-		dev_warn(mdev->dev, "%s: RB block for extts 0x%X is not found!", __func__, extts->index);
+		dev_warn(mdev->dev, "%s: RB block for extts channel 0x%X is not found!", __func__, extts->index);
 		return -EINVAL;
 	}
 
-	/* Reject requests with unsupported flags */
+	// Reject requests with unsupported flags
 	if (extts->flags & ~(PTP_ENABLE_FEATURE |
 				PTP_RISING_EDGE |
 				PTP_FALLING_EDGE |
 				PTP_STRICT_FLAGS))
 		return -EOPNOTSUPP;
 
-	/* Reject requests to enable time stamping on falling edge */
+	// Reject requests to enable time stamping on falling edge
 	if ((extts->flags & PTP_ENABLE_FEATURE) &&
 	    (extts->flags & PTP_FALLING_EDGE))
 		return -EOPNOTSUPP;
@@ -292,47 +285,43 @@ static void mqnic_extts_work_gptu(struct work_struct *work)
 	struct mqnic_dev *mdev = container_of(work, struct mqnic_dev, extts_work.work);
 	struct mqnic_reg_block *rb;
 
-	// struct ptp_clock_info *ptp = &mdev->ptp_clock_info;
 	struct timespec64 ts;
 
 	struct ptp_clock_event event;
 	u32 dco_delay = 0;
-	bool triggered = 0;
+	bool triggered = 0, step = 0;
 	u32 status = 0;
 	u8 chan;
 
-	// dev_info(mdev->dev, "%s is called!", __func__);	
-
 	for (chan = 0; chan < PTP_EXTTS_CH_MAX; chan++) {
-		// dev_info(mdev->dev, "%s: processing channel %d", __func__, chan);	
-
 		rb = mqnic_find_reg_block(mdev->rb_list, MQNIC_RB_EXTTS_TYPE,
 				MQNIC_RB_EXTTS_VER, chan);
 
 		if (!rb)
 			return;
 
-		// ioread32(mdev->phc_rb->regs + MQNIC_RB_PHC_REG_GET_FNS);
-		// ts.tv_nsec = ioread32(mdev->phc_rb->regs + MQNIC_RB_PHC_REG_GET_NS);
-		// ts.tv_sec = ioread32(mdev->phc_rb->regs + MQNIC_RB_PHC_REG_GET_SEC_L);
-		// ts.tv_sec |= (u64) ioread32(mdev->phc_rb->regs + MQNIC_RB_PHC_REG_GET_SEC_H) << 32;
-
-		// dev_info(mdev->dev, "%s: PHC ns: %lld", __func__, timespec64_to_ns(&ts));	
-
 		ioread32(rb->regs + MQNIC_RB_EXTTS_REG_GET_FNS);
 		ts.tv_nsec = ioread32(rb->regs + MQNIC_RB_EXTTS_REG_GET_NS);
 		ts.tv_sec = ioread32(rb->regs + MQNIC_RB_EXTTS_REG_GET_SEC_L);
 		ts.tv_sec |= (u64) ioread32(rb->regs + MQNIC_RB_EXTTS_REG_GET_SEC_H) << 32;
 
-		// dev_info(mdev->dev, "%s: EXTTS ns: %lld", __func__, timespec64_to_ns(&ts));	
-
 		status = ioread32(rb->regs + MQNIC_RB_EXTTS_REG_CTRL);
 
-		// dev_info(mdev->dev, "%s: EXTTS status:  0x%X", __func__, status);
 		triggered = status & (0x1 << 4);
+		step = status & (0x1 << 5);
+
+		// if (status & 0x30) {
+		// 	dev_info(mdev->dev, "%s: Ch %d, status: 0x%X", __func__, status);
+		// }
+
+		if (step) {
+			dev_info(mdev->dev, "%s: Stepping ch: %d, ns: %lld", __func__, chan, timespec64_to_ns(&ts));
+			schedule_delayed_work(&mdev->extts_work, msecs_to_jiffies(PTP_EXTTS_STEP_MS));
+			return ;
+		}
 
 		if (triggered) {
-			dev_info(mdev->dev, "%s: EXTTS ns: %lld", __func__, timespec64_to_ns(&ts));	
+			dev_info(mdev->dev, "%s: EXTTS ch: %d, ns: %lld", __func__, chan, timespec64_to_ns(&ts));
 			/* Triggered - save timestamp */
 			event.type = PTP_CLOCK_EXTTS;
 			event.index = chan;
@@ -410,6 +399,7 @@ static void mqnic_phc_set_from_system_clock(struct ptp_clock_info *ptp)
 void mqnic_register_phc(struct mqnic_dev *mdev)
 {
 	int perout_ch_count = 0;
+	int extts_ch_count = 0;
 	struct mqnic_reg_block *rb;
 
 	if (!mdev->phc_rb) {
@@ -428,12 +418,21 @@ void mqnic_register_phc(struct mqnic_dev *mdev)
 		perout_ch_count++;
 	}
 
+	// count PTP extts input channels
+	while ((rb = mqnic_find_reg_block(mdev->rb_list, MQNIC_RB_EXTTS_TYPE,
+			MQNIC_RB_PHC_PEROUT_VER, extts_ch_count))) {
+		extts_ch_count++;
+	}
+
+	if (extts_ch_count > PTP_EXTTS_CH_MAX)
+		extts_ch_count = PTP_EXTTS_CH_MAX;
+
 	mdev->ptp_clock_info.owner = THIS_MODULE;
 	snprintf(mdev->ptp_clock_info.name, sizeof(mdev->ptp_clock_info.name),
 			"%s_ptp", mdev->name);
 	mdev->ptp_clock_info.max_adj = 100000000;
 	mdev->ptp_clock_info.n_alarm = 0;
-	mdev->ptp_clock_info.n_ext_ts = PTP_EXTTS_CH_MAX;
+	mdev->ptp_clock_info.n_ext_ts = extts_ch_count;
 	mdev->ptp_clock_info.n_per_out = perout_ch_count;
 	mdev->ptp_clock_info.n_pins = 0;
 	mdev->ptp_clock_info.pps = 0;

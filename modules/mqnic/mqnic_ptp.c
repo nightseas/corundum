@@ -38,7 +38,6 @@
 
 #define PTP_EXTTS_CH_MAX    2
 #define PTP_EXTTS_PERIOD_MS 95
-#define PTP_EXTTS_STEP_MS   1995
 
 enum mqnic_gptu_ptp_pins {
 	SMAI = 0,
@@ -49,7 +48,7 @@ enum mqnic_gptu_ptp_pins {
 };
 
 static const struct ptp_pin_desc mqnic_pin_desc_gptu[] = {
-	/* name     idx   func            chan   rsvd   */
+	/* name     idx   func	    chan   rsvd   */
 	 { "TU_I",  TUI,  PTP_PF_EXTTS,   0,     { 0, } },
 	 { "TU_O",  TUO,  PTP_PF_PEROUT,  0,     { 0, } },
 	 { "SMA_I", SMAI, PTP_PF_EXTTS,   1,     { 0, } },
@@ -83,7 +82,7 @@ static int mqnic_phc_adjfine(struct ptp_clock_info *ptp, long scaled_ppm)
 	bool neg = false;
 	u64 nom_per_fns, adj;
 
-	dev_info(mdev->dev, "%s: scaled_ppm: %ld", __func__, scaled_ppm);
+	//dev_info(mdev->dev, "%s: scaled_ppm: %ld", __func__, scaled_ppm);
 
 	if (scaled_ppm < 0) {
 		neg = true;
@@ -106,7 +105,7 @@ static int mqnic_phc_adjfine(struct ptp_clock_info *ptp, long scaled_ppm)
 	iowrite32(adj & 0xffffffff, mdev->phc_rb->regs + MQNIC_RB_PHC_REG_PERIOD_FNS);
 	iowrite32(adj >> 32, mdev->phc_rb->regs + MQNIC_RB_PHC_REG_PERIOD_NS);
 
-	dev_info(mdev->dev, "%s adj: 0x%llx", __func__, adj);
+	//dev_info(mdev->dev, "%s adj: 0x%llx", __func__, adj);
 
 	return 0;
 }
@@ -187,7 +186,7 @@ static int mqnic_phc_perout(struct ptp_clock_info *ptp, int on, struct ptp_perou
 		return -EINVAL;
 
 	if (!on) {
-		iowrite32(0, rb->regs + MQNIC_RB_PHC_PEROUT_REG_CTRL);
+	//	iowrite32(0, rb->regs + MQNIC_RB_PHC_PEROUT_REG_CTRL);
 
 		return 0;
 	}
@@ -257,7 +256,7 @@ static int mqnic_phc_extts_gptu(struct ptp_clock_info *ptp, int on, struct ptp_e
 
 	// Reject requests to enable time stamping on falling edge
 	if ((extts->flags & PTP_ENABLE_FEATURE) &&
-	    (extts->flags & PTP_FALLING_EDGE))
+		(extts->flags & PTP_FALLING_EDGE))
 		return -EOPNOTSUPP;
 
 	if (!on) {
@@ -271,7 +270,7 @@ static int mqnic_phc_extts_gptu(struct ptp_clock_info *ptp, int on, struct ptp_e
 	}
 
 	dev_info(mdev->dev, "%s: enabling extts for channel %d!", __func__, extts->index);
-	
+
 	ctrl = ioread32(rb->regs + MQNIC_RB_EXTTS_REG_CTRL);
 	iowrite32(ctrl | 0x1, rb->regs + MQNIC_RB_EXTTS_REG_CTRL);
 
@@ -288,10 +287,10 @@ static void mqnic_extts_work_gptu(struct work_struct *work)
 	struct timespec64 ts;
 
 	struct ptp_clock_event event;
-	u32 dco_delay = 0;
 	bool triggered = 0, step = 0;
 	u32 status = 0;
 	u8 chan;
+	u32 sec_l = 0, sec_h = 0, nsec = 0;
 
 	for (chan = 0; chan < PTP_EXTTS_CH_MAX; chan++) {
 		rb = mqnic_find_reg_block(mdev->rb_list, MQNIC_RB_EXTTS_TYPE,
@@ -300,32 +299,38 @@ static void mqnic_extts_work_gptu(struct work_struct *work)
 		if (!rb)
 			return;
 
-		ioread32(rb->regs + MQNIC_RB_EXTTS_REG_GET_FNS);
-		ts.tv_nsec = ioread32(rb->regs + MQNIC_RB_EXTTS_REG_GET_NS);
-		ts.tv_sec = ioread32(rb->regs + MQNIC_RB_EXTTS_REG_GET_SEC_L);
-		ts.tv_sec |= (u64) ioread32(rb->regs + MQNIC_RB_EXTTS_REG_GET_SEC_H) << 32;
-
 		status = ioread32(rb->regs + MQNIC_RB_EXTTS_REG_CTRL);
+
+		if (status & 0x30) {
+			// 	ioread32(rb->regs + MQNIC_RB_EXTTS_REG_GET_FNS);
+			nsec = ioread32(rb->regs + MQNIC_RB_EXTTS_REG_GET_NS);
+			sec_l = ioread32(rb->regs + MQNIC_RB_EXTTS_REG_GET_SEC_L);
+			sec_h = ioread32(rb->regs + MQNIC_RB_EXTTS_REG_GET_SEC_H);
+			//dev_info(mdev->dev, "%s: Polling ch %d, status: 0x%X", __func__, chan, status);
+
+			ts.tv_nsec = nsec;
+			ts.tv_sec = sec_l;
+			ts.tv_sec |= (u64) sec_h << 32;
+		}
 
 		triggered = status & (0x1 << 4);
 		step = status & (0x1 << 5);
 
-		// if (status & 0x30) {
-		// 	dev_info(mdev->dev, "%s: Ch %d, status: 0x%X", __func__, status);
-		// }
-
 		if (step) {
 			dev_info(mdev->dev, "%s: Stepping ch: %d, ns: %lld", __func__, chan, timespec64_to_ns(&ts));
-			schedule_delayed_work(&mdev->extts_work, msecs_to_jiffies(PTP_EXTTS_STEP_MS));
-			return ;
 		}
 
 		if (triggered) {
 			dev_info(mdev->dev, "%s: EXTTS ch: %d, ns: %lld", __func__, chan, timespec64_to_ns(&ts));
+			//dev_info(mdev->dev, "%s: NS: 0x%X", __func__, nsec);
+			//dev_info(mdev->dev, "%s: SL: 0x%X", __func__, sec_l);
+			//dev_info(mdev->dev, "%s: SH: 0x%X", __func__, sec_h);
+
+
 			/* Triggered - save timestamp */
 			event.type = PTP_CLOCK_EXTTS;
 			event.index = chan;
-			event.timestamp = timespec64_to_ns(&ts) - dco_delay;
+			event.timestamp = timespec64_to_ns(&ts);
 			ptp_clock_event(mdev->ptp_clock, &event);
 		}
 		schedule_delayed_work(&mdev->extts_work, msecs_to_jiffies(PTP_EXTTS_PERIOD_MS));

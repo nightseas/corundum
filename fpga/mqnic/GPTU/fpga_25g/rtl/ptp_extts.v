@@ -16,10 +16,7 @@ By Xiaohai Li (haixiaolee@gmail.com)
  */
 module ptp_extts #
 (
-    parameter FNS_ENABLE = 1,
-    parameter EXTTS_CALI_S = 48'h0,
-    parameter EXTTS_CALI_NS = 30'h14,
-    parameter EXTTS_CALI_FNS = 16'h0000
+    parameter FNS_ENABLE = 0
 )
 (
     input  wire         clk,
@@ -44,8 +41,6 @@ module ptp_extts #
      */
     input  wire         enable,
     input  wire         arm,
-    input  wire [95:0]  input_cali,
-    input  wire         input_cali_valid,
 
     /*
      * Status
@@ -57,30 +52,29 @@ module ptp_extts #
 
 // 
 reg [4:0] sync_trig_reg = 0;
-reg [96:0] ts_96_reg = 0;
+reg [95:0] ts_96_reg = 0;
 reg ts_96_valid_reg = 0;
 reg ts_96_step_reg = 0;
-
-reg [47:0] cali_s_reg = EXTTS_CALI_S;
-reg [30:0] cali_ns_reg = EXTTS_CALI_NS;
-reg [15:0] cali_fns_reg = EXTTS_CALI_FNS;
 
 reg [47:0] time_s_reg = 0;
 reg [30:0] time_ns_reg = 0;
 reg [15:0] time_fns_reg = 0;
-reg [96:0] time_ts_sync_0_reg = 0;
-reg [96:0] time_ts_sync_1_reg = 0;
-reg [1:0]  time_valid_reg = 0;
-reg [1:0]  time_step_reg = 0;
+reg [95:0] time_ts_sync_0_reg = 0;
+reg [95:0] time_ts_sync_1_reg = 0;
+reg [95:0] time_ts_sync_2_reg = 0;
+reg [95:0] time_ts_sync_3_reg = 0;
+reg [3:0]  time_valid_reg = 0;
+reg [3:0]  time_step_reg = 0;
 
 reg locked_reg = 1'b0;
 reg step_reg = 1'b0;
 
-wire sync_trig_rise;
-wire sync_trig_fall;
+wire sync_trig_rise = (~ sync_trig_reg[4]) & sync_trig_reg[3];
+wire sync_trig_fall = (~ sync_trig_reg[3]) & sync_trig_reg[4];
 
-assign sync_trig_rise = (~ sync_trig_reg[4]) & sync_trig_reg[3];
-assign sync_trig_fall = (~ sync_trig_reg[3]) & sync_trig_reg[4];
+wire [95:0] time_ts_sync = time_ts_sync_3_reg;
+wire time_valid_sync = time_valid_reg[3];
+wire time_step_sync = time_step_reg[3];
 
 assign locked = locked_reg;
 assign step = step_reg;
@@ -121,16 +115,24 @@ end
 always @(posedge clk) begin
     time_ts_sync_0_reg <= ts_96_reg;
     time_ts_sync_1_reg <= time_ts_sync_0_reg;
+    time_ts_sync_2_reg <= time_ts_sync_1_reg;
+    time_ts_sync_3_reg <= time_ts_sync_2_reg;
 
     time_valid_reg[0] <= ts_96_valid_reg;
     time_valid_reg[1] <= time_valid_reg[0];
+    time_valid_reg[2] <= time_valid_reg[1];
+    time_valid_reg[3] <= time_valid_reg[2];
     
     time_step_reg[0] <= ts_96_step_reg;
     time_step_reg[1] <= time_step_reg[0];
+    time_step_reg[2] <= time_step_reg[1];
+    time_step_reg[3] <= time_step_reg[2];
 
     if (ptp_rst) begin
         time_ts_sync_0_reg <= 0;
         time_ts_sync_1_reg <= 0;
+        time_ts_sync_2_reg <= 0;
+        time_ts_sync_3_reg <= 0;
         time_valid_reg <= 0;
         time_step_reg <= 0;
     end
@@ -139,51 +141,30 @@ end
 
 
 always @(posedge clk) begin
-
-    if (input_cali_valid) begin
-        cali_s_reg <= input_cali[95:48];
-        cali_ns_reg <= input_cali[45:16];
-        if (FNS_ENABLE) begin
-            cali_fns_reg <= input_cali[15:0];
-        end
-    end
-
     if (enable) begin
-        if (time_step_reg[1]) begin
+        if (time_step_sync) begin
             step_reg <= 1'b1;
             locked_reg <= 1'b0;
-
-            time_s_reg <= 0;
-            time_ns_reg <= 0;
-            time_fns_reg <= 0;
         end
         // Only support rise edge for now
-        else if (time_valid_reg[1]) begin
+        else if (time_valid_sync && (~locked_reg)) begin
             step_reg <= 1'b0;
             locked_reg <= 1'b1;
              
-            time_s_reg <= time_ts_sync_1_reg[95:48] - cali_s_reg;
-            time_ns_reg <= time_ts_sync_1_reg[45:16] - cali_ns_reg;
+            time_s_reg <= time_ts_sync[95:48];
+            time_ns_reg <= time_ts_sync[45:16];
             if (FNS_ENABLE) begin
-                time_fns_reg <= time_ts_sync_1_reg[15:0] - cali_fns_reg;
+                time_fns_reg <= time_ts_sync[15:0];
             end
         end
         // Triggered by control reg reading
         else if (arm) begin
             step_reg <= 1'b0;
             locked_reg <= 1'b0;
-
-            time_s_reg <= 0;
-            time_ns_reg <= 0;
-            time_fns_reg <= 0;
         end
     end
 
     if (rst) begin
-        cali_s_reg <= EXTTS_CALI_S;
-        cali_ns_reg <= EXTTS_CALI_NS;
-        cali_fns_reg <= EXTTS_CALI_FNS;
-
         time_s_reg <= 0;
         time_ns_reg <= 0;
         time_fns_reg <= 0;

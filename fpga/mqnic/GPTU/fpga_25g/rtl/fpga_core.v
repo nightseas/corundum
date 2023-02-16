@@ -960,10 +960,7 @@ always @(posedge clk_250mhz) begin
 end
 
 ptp_extts #(
-    .FNS_ENABLE(1),
-    .EXTTS_CALI_S(0),
-    .EXTTS_CALI_NS(30'h14),
-    .EXTTS_CALI_FNS(0)
+    .FNS_ENABLE(1)
 )
 ptp_extts_0_inst (
     .clk(clk_250mhz),
@@ -979,8 +976,6 @@ ptp_extts_0_inst (
 
     .enable(extts_0_en_reg),
     .arm(extts_0_arm_reg),
-    .input_cali(set_extts_0_cali_reg),
-    .input_cali_valid(set_extts_0_cali_valid_reg),
 
     .extts_latched(extts_0_latched),
     .locked(extts_0_valid),
@@ -988,10 +983,7 @@ ptp_extts_0_inst (
 );
 
 ptp_extts #(
-    .FNS_ENABLE(1),
-    .EXTTS_CALI_S(0),
-    .EXTTS_CALI_NS(30'h14),
-    .EXTTS_CALI_FNS(0)
+    .FNS_ENABLE(1)
 )
 ptp_extts_1_inst (
     .clk(clk_250mhz),
@@ -1007,8 +999,6 @@ ptp_extts_1_inst (
 
     .enable(extts_1_en_reg),
     .arm(extts_1_arm_reg),
-    .input_cali(set_extts_1_cali_reg),
-    .input_cali_valid(set_extts_1_cali_valid_reg),
 
     .extts_latched(extts_1_latched),
     .locked(extts_1_valid),
